@@ -1,10 +1,10 @@
-const CACHE_NAME = "core-review-v4";
+const CACHE_NAME = "core-review-v6";
 const ASSETS = [
   "./",
   "./index.html",
-  "./styles.css",
-  "./app.js",
-  "./manifest.webmanifest",
+  "./styles.css?v=6",
+  "./app.js?v=6",
+  "./manifest.webmanifest?v=6",
   "./icon.svg",
   "./sw.js"
 ];
@@ -26,12 +26,14 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
   event.respondWith(
-    caches.match(event.request).then((cached) =>
-      cached || fetch(event.request).then((response) => {
-        const copy = response.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
-        return response;
-      })
+    fetch(event.request).then((response) => {
+      const copy = response.clone();
+      caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+      return response;
+    }).catch(() =>
+      caches.match(event.request).then((cached) =>
+        cached || caches.match("./index.html").then((fallback) => fallback || Response.error())
+      )
     )
   );
 });

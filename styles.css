@@ -308,6 +308,14 @@ body[data-subject="math"] {
   align-content: start;
 }
 
+.sidebar {
+  order: 1;
+}
+
+.practice-area {
+  order: 2;
+}
+
 .panel,
 .question-panel,
 .session-panel {
@@ -917,12 +925,12 @@ button:focus-visible {
 
 @media (max-width: 720px) {
   body {
-    padding-bottom: 62px;
+    padding-bottom: 58px;
   }
 
   .app-shell {
-    width: calc(100% - 16px);
-    padding: 8px 0;
+    width: 100%;
+    padding: 6px 8px 8px;
   }
 
   .topbar,
@@ -933,28 +941,33 @@ button:focus-visible {
 
   .topbar {
     display: flex;
-    gap: 10px;
-    padding: 12px;
+    gap: 6px;
+    padding: 8px 10px;
   }
 
   .brand {
-    align-items: flex-start;
-    gap: 10px;
+    align-items: center;
+    gap: 8px;
   }
 
   .brand-mark {
-    width: 46px;
-    height: 46px;
-    flex: 0 0 46px;
+    width: 34px;
+    height: 34px;
+    flex: 0 0 34px;
+  }
+
+  .brand .kicker {
+    display: none;
   }
 
   h1 {
-    font-size: 2rem;
+    font-size: 1.25rem;
     line-height: 1.05;
   }
 
   .brand p {
-    font-size: 0.95rem;
+    margin-top: 2px;
+    font-size: 0.76rem;
   }
 
   .score-strip,
@@ -966,6 +979,11 @@ button:focus-visible {
   .score-strip {
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 5px;
+  }
+
+  body[data-view="practice"] .score-strip,
+  body[data-view="practice"] .page-tabs {
+    display: none;
   }
 
   .score-strip div {
@@ -1008,12 +1026,12 @@ button:focus-visible {
   .workspace {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
   }
 
   .practice-area {
     order: 1;
-    gap: 10px;
+    gap: 8px;
   }
 
   .sidebar {
@@ -1047,7 +1065,7 @@ button:focus-visible {
   }
 
   .question-panel {
-    padding: 14px;
+    padding: 12px;
   }
 
   .question-head {
@@ -1059,15 +1077,15 @@ button:focus-visible {
   }
 
   .question-head h2 {
-    margin-top: 8px;
-    font-size: 1.55rem;
+    margin-top: 7px;
+    font-size: 1.38rem;
   }
 
   .mobile-daily-goal {
     display: grid;
-    gap: 7px;
-    margin-top: 10px;
-    padding: 10px;
+    gap: 6px;
+    margin-top: 8px;
+    padding: 8px;
     border: 1px solid var(--line);
     border-radius: 8px;
     background: var(--surface-soft);
@@ -1087,17 +1105,17 @@ button:focus-visible {
   }
 
   .question-text {
-    margin-top: 12px;
-    font-size: 1.16rem;
+    margin-top: 10px;
+    font-size: 1.08rem;
   }
 
   .answer-area {
-    margin-top: 12px;
+    margin-top: 10px;
     gap: 8px;
   }
 
   .choice-button {
-    min-height: 50px;
+    min-height: 48px;
     padding: 10px 11px;
   }
 

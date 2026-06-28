@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#287a58">
   <title>核心科溫習器</title>
-  <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="manifest.webmanifest?v=6">
+  <link rel="stylesheet" href="styles.css?v=6">
 </head>
 <body>
   <div class="app-shell">
@@ -83,52 +83,6 @@
     <main>
       <section id="practiceView" class="app-view active" data-view-panel="practice">
         <div class="workspace">
-          <aside class="sidebar">
-            <section class="panel">
-              <div class="panel-title">
-                <span>範疇</span>
-                <button id="resetProgress" class="icon-button" type="button" title="重設進度" aria-label="重設進度">↻</button>
-              </div>
-              <div id="topicList" class="topic-list" role="listbox" aria-label="選擇溫習範疇"></div>
-            </section>
-
-            <section class="panel compact">
-              <div class="panel-title">模式</div>
-              <div class="segmented" role="radiogroup" aria-label="練習模式">
-                <button class="segment active" type="button" data-mode="practice">
-                  <span>專題</span>
-                  <small>目前單元</small>
-                </button>
-                <button class="segment" type="button" data-mode="mixed">
-                  <span>綜合</span>
-                  <small>全範圍</small>
-                </button>
-                <button class="segment" type="button" data-mode="wrong">
-                  <span>錯題</span>
-                  <small>重做</small>
-                </button>
-              </div>
-            </section>
-
-            <section class="panel compact">
-              <div class="panel-title">本題資料</div>
-              <dl class="meta-list">
-                <div>
-                  <dt>單元</dt>
-                  <dd id="unitLabel">--</dd>
-                </div>
-                <div>
-                  <dt>模式</dt>
-                  <dd id="modeLabel">--</dd>
-                </div>
-                <div>
-                  <dt>重點</dt>
-                  <dd id="focusLabel">--</dd>
-                </div>
-              </dl>
-            </section>
-          </aside>
-
           <section class="practice-area">
             <section class="session-panel" aria-label="目前單元進度">
               <div>
@@ -187,6 +141,52 @@
               <div id="miniWeakList" class="weak-list"></div>
             </section>
           </section>
+
+          <aside class="sidebar">
+            <section class="panel">
+              <div class="panel-title">
+                <span>範疇</span>
+                <button id="resetProgress" class="icon-button" type="button" title="重設進度" aria-label="重設進度">↻</button>
+              </div>
+              <div id="topicList" class="topic-list" role="listbox" aria-label="選擇溫習範疇"></div>
+            </section>
+
+            <section class="panel compact">
+              <div class="panel-title">模式</div>
+              <div class="segmented" role="radiogroup" aria-label="練習模式">
+                <button class="segment active" type="button" data-mode="practice">
+                  <span>專題</span>
+                  <small>目前單元</small>
+                </button>
+                <button class="segment" type="button" data-mode="mixed">
+                  <span>綜合</span>
+                  <small>全範圍</small>
+                </button>
+                <button class="segment" type="button" data-mode="wrong">
+                  <span>錯題</span>
+                  <small>重做</small>
+                </button>
+              </div>
+            </section>
+
+            <section class="panel compact">
+              <div class="panel-title">本題資料</div>
+              <dl class="meta-list">
+                <div>
+                  <dt>單元</dt>
+                  <dd id="unitLabel">--</dd>
+                </div>
+                <div>
+                  <dt>模式</dt>
+                  <dd id="modeLabel">--</dd>
+                </div>
+                <div>
+                  <dt>重點</dt>
+                  <dd id="focusLabel">--</dd>
+                </div>
+              </dl>
+            </section>
+          </aside>
         </div>
       </section>
 
@@ -241,6 +241,6 @@
     <button type="button" data-mobile-view="progress">進度</button>
   </div>
 
-  <script src="app.js"></script>
+  <script src="app.js?v=6"></script>
 </body>
 </html>

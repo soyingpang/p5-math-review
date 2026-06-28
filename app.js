@@ -422,6 +422,7 @@
   }
 
   function renderViewTabs() {
+    document.body.dataset.view = state.view;
     document.querySelectorAll(".page-tab").forEach((button) => {
       const active = button.dataset.view === state.view;
       button.classList.toggle("active", active);
@@ -1115,7 +1116,10 @@
     const numericAnswer = Number(String(correctLabel).replace(/,/g, ""));
     if (Number.isFinite(numericAnswer)) {
       [1, -1, 2, -2, 5, -5, 10, -10].forEach((offset) => {
-        const candidate = String(cleanDecimal(numericAnswer + offset));
+        const candidateNumber = cleanDecimal(numericAnswer + offset);
+        const candidate = String(correctLabel).includes(",")
+          ? formatNumber(candidateNumber)
+          : String(candidateNumber);
         if (unique.length < 4 && !unique.includes(candidate)) unique.push(candidate);
       });
     }
