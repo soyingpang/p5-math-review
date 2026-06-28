@@ -181,6 +181,96 @@ h1 {
   color: #fff;
 }
 
+.control-deck {
+  display: grid;
+  grid-template-columns: minmax(360px, 1fr) minmax(150px, 0.25fr) minmax(280px, 0.55fr);
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.control-deck > div,
+.grade-picker,
+.daily-goal {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 12px;
+}
+
+.subject-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.subject-tab {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  min-height: 46px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  font-weight: 900;
+}
+
+.subject-tab span {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: #edf1f5;
+  color: var(--blue);
+}
+
+.subject-tab[aria-pressed="true"] {
+  border-color: var(--green);
+  background: #edf7f0;
+}
+
+.grade-picker,
+.daily-goal {
+  display: grid;
+  gap: 8px;
+}
+
+select {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  padding: 8px 10px;
+  font-weight: 900;
+}
+
+.daily-goal {
+  grid-template-columns: minmax(0, 1fr) minmax(88px, auto);
+  align-items: center;
+}
+
+.daily-goal label {
+  display: grid;
+  gap: 4px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.daily-goal .progress-track,
+.daily-status {
+  grid-column: 1 / 3;
+}
+
+.daily-status {
+  color: var(--green-dark);
+  font-weight: 900;
+}
+
 .app-view {
   display: none;
   margin-top: 14px;
@@ -188,6 +278,16 @@ h1 {
 
 .app-view.active {
   display: block;
+}
+
+body[data-subject="english"] {
+  --green: #2e638b;
+  --green-dark: #154865;
+}
+
+body[data-subject="math"] {
+  --green: #b76518;
+  --green-dark: #815019;
 }
 
 .workspace {
@@ -769,6 +869,10 @@ button:focus-visible {
   font-weight: 900;
 }
 
+.mobile-dock {
+  display: none;
+}
+
 @media (max-width: 1100px) {
   .curriculum-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -778,6 +882,7 @@ button:focus-visible {
 @media (max-width: 980px) {
   .workspace,
   .view-grid,
+  .control-deck,
   .session-panel {
     grid-template-columns: 1fr;
   }
@@ -791,6 +896,10 @@ button:focus-visible {
 }
 
 @media (max-width: 720px) {
+  body {
+    padding-bottom: 74px;
+  }
+
   .app-shell {
     width: calc(100% - 24px);
     padding: 0;
@@ -809,9 +918,14 @@ button:focus-visible {
   }
 
   .score-strip,
-  .page-tabs {
+  .page-tabs,
+  .subject-tabs {
     min-width: 0;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
+  }
+
+  .control-deck {
+    display: none;
   }
 
   .topic-list,
@@ -849,6 +963,31 @@ button:focus-visible {
 
   .progress-hero {
     grid-template-columns: 1fr;
+  }
+
+  .mobile-dock {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 20;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    width: 100%;
+    padding: 8px;
+    border-top: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.96);
+  }
+
+  .mobile-dock button,
+  .mobile-dock select {
+    min-height: 40px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--ink);
+    font-weight: 900;
   }
 }
 

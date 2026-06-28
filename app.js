@@ -1,11 +1,23 @@
 (function () {
   "use strict";
 
-  const STORAGE_KEY = "p5MathReviewProgress.v1";
-  const WRONG_KEY = "p5MathReviewWrongBank.v1";
-  const SETTINGS_KEY = "p5MathReviewSettings.v1";
+  const STORAGE_KEY = "coreReviewProgress.v2";
+  const WRONG_KEY = "coreReviewWrongBank.v2";
+  const SETTINGS_KEY = "coreReviewSettings.v2";
+  const DAILY_KEY = "coreReviewDailyGoal.v1";
 
-  const topics = [
+  const subjects = [
+    { id: "chinese", short: "中", name: "中國語文", theme: "green" },
+    { id: "english", short: "英", name: "English", theme: "blue" },
+    { id: "math", short: "數", name: "Mathematics", theme: "amber" }
+  ];
+
+  const grades = [
+    ["P1", "小一"], ["P2", "小二"], ["P3", "小三"], ["P4", "小四"], ["P5", "小五"], ["P6", "小六"],
+    ["S1", "中一"], ["S2", "中二"], ["S3", "中三"], ["S4", "中四"], ["S5", "中五"], ["S6", "中六"]
+  ].map(([id, name]) => ({ id, name }));
+
+  const mathP5Topics = [
     {
       id: "5N1",
       domain: "數範疇",
@@ -104,10 +116,122 @@
     }
   ];
 
+  const curriculumBlueprint = {
+    chinese: {
+      primary: [
+        ["字詞認讀", "識字、字形、字音、字義和常用詞語。"],
+        ["閱讀理解", "找重點、理解段意、推斷人物和事件。"],
+        ["句子運用", "標點、句式、連接詞和修辭入門。"],
+        ["寫作表達", "看圖寫句、短段、記敘和實用文。"],
+        ["聆聽說話", "聽取重點、清楚表達和日常溝通。"]
+      ],
+      junior: [
+        ["閱讀策略", "概括主旨、分析結構、語氣和寫作手法。"],
+        ["文言基礎", "常見文言詞、句式和篇章理解。"],
+        ["寫作訓練", "記敘、描寫、說明、議論和材料運用。"],
+        ["語文知識", "詞類、句子、修辭和標點運用。"],
+        ["說話能力", "匯報、討論、演講和回應技巧。"]
+      ],
+      senior: [
+        ["閱讀卷訓練", "篇章理解、比較、評價和答題組織。"],
+        ["寫作卷訓練", "審題、立意、材料組織和表達層次。"],
+        ["文言閱讀", "實詞、虛詞、句式、翻譯和內容分析。"],
+        ["綜合能力", "整合材料、轉述、歸納和實用寫作。"],
+        ["口語溝通", "小組討論、個人短講和論點回應。"]
+      ]
+    },
+    english: {
+      primary: [
+        ["Vocabulary", "High-frequency words, word families and topic vocabulary."],
+        ["Grammar", "Tenses, pronouns, prepositions, conjunctions and sentence patterns."],
+        ["Reading", "Main ideas, details, inference and text features."],
+        ["Writing", "Sentences, short paragraphs, stories, emails and descriptions."],
+        ["Speaking & Listening", "Everyday responses, instructions and short presentations."]
+      ],
+      junior: [
+        ["Vocabulary", "Word formation, collocations, tone and context clues."],
+        ["Grammar", "Tenses, clauses, modals, reported speech and sentence variety."],
+        ["Reading Skills", "Skimming, scanning, inference, writer's attitude and text type."],
+        ["Writing Skills", "Paragraphing, cohesion, formal and informal writing."],
+        ["Oral Communication", "Discussion, presentation, elaboration and interaction."]
+      ],
+      senior: [
+        ["Reading Paper", "Inference, comparison, tone, purpose and evidence-based answers."],
+        ["Writing Paper", "Genre, register, argument, organization and language accuracy."],
+        ["Vocabulary & Usage", "Precise wording, collocations, idioms and academic phrases."],
+        ["Listening & Integrated Skills", "Note-taking, data transfer, synthesis and task completion."],
+        ["Speaking", "Individual response, group interaction and persuasive support."]
+      ]
+    },
+    math: {
+      primary: [
+        ["數與運算", "整數、四則運算、估算、倍數和因數。"],
+        ["分數與小數", "分數、小數、百分數和互化。"],
+        ["度量", "長度、重量、容量、時間、周界、面積和體積。"],
+        ["圖形與空間", "平面圖形、立體圖形、角、對稱和方向。"],
+        ["數據處理", "表格、象形圖、棒形圖、折線圖和平均數。"]
+      ],
+      junior: [
+        ["數與代數", "有向數、指數、百分法、代數式和方程。"],
+        ["圖形與空間", "角、三角形、四邊形、圓、相似和坐標。"],
+        ["度量與幾何", "周界、面積、體積、畢氏定理和三角比入門。"],
+        ["數據處理", "統計圖、平均數、中位數、概率和變異。"],
+        ["函數與關係", "公式、變量、線性關係和圖像。"]
+      ],
+      senior: [
+        ["數與代數", "二次方程、不等式、指數、對數和數列。"],
+        ["函數與圖像", "多項式、指數、對數、三角函數和變換。"],
+        ["坐標幾何", "直線、圓、距離、斜率和軌跡。"],
+        ["微積分基礎", "極限概念、導數、應用和面積。"],
+        ["統計與概率", "排列組合、概率分佈、抽樣和數據分析。"]
+      ]
+    }
+  };
+
+  const gradeBand = (gradeId) => {
+    if (gradeId.startsWith("P")) return "primary";
+    if (["S1", "S2", "S3"].includes(gradeId)) return "junior";
+    return "senior";
+  };
+
+  const subjectName = (subjectId) => subjects.find((item) => item.id === subjectId)?.name || "Mathematics";
+  const gradeName = (gradeId) => grades.find((item) => item.id === gradeId)?.name || "小五";
+
+  function buildTopics(subjectId, gradeId) {
+    if (subjectId === "math" && gradeId === "P5") {
+      return mathP5Topics.map((topic) => ({
+        ...topic,
+        id: `math-P5-${topic.id}`,
+        originalId: topic.id,
+        subjectId,
+        gradeId
+      }));
+    }
+
+    const band = gradeBand(gradeId);
+    const source = curriculumBlueprint[subjectId][band];
+    return source.map((item, index) => {
+      const code = `${subjects.find((subject) => subject.id === subjectId).short}${gradeId}-${index + 1}`;
+      return {
+        id: `${subjectId}-${gradeId}-${index + 1}`,
+        originalId: code,
+        subjectId,
+        gradeId,
+        domain: subjectName(subjectId),
+        name: item[0],
+        focus: item[1],
+        summary: `${gradeName(gradeId)} ${subjectName(subjectId)}：${item[1]}`,
+        generators: [genericQuestion]
+      };
+    });
+  }
+
   const savedSettings = loadSettings();
 
   let state = {
-    selectedTopic: savedSettings.selectedTopic || "5N1",
+    subject: savedSettings.subject || "math",
+    grade: savedSettings.grade || "P5",
+    selectedTopic: savedSettings.selectedTopic || "",
     mode: savedSettings.mode || "practice",
     view: savedSettings.view || "practice",
     current: null,
@@ -115,14 +239,28 @@
     checked: false,
     streak: 0,
     progress: loadProgress(),
-    wrongBank: loadWrongBank()
+    wrongBank: loadWrongBank(),
+    daily: loadDailyGoal()
   };
+
+  let topics = buildTopics(state.subject, state.grade);
+  if (!topics.some((topic) => topic.id === state.selectedTopic)) {
+    state.selectedTopic = topics[0].id;
+  }
 
   const els = {
     answeredCount: document.getElementById("answeredCount"),
     accuracyRate: document.getElementById("accuracyRate"),
     streakCount: document.getElementById("streakCount"),
     wrongBankCount: document.getElementById("wrongBankCount"),
+    subjectTabs: document.getElementById("subjectTabs"),
+    gradeSelect: document.getElementById("gradeSelect"),
+    mobileSubject: document.getElementById("mobileSubject"),
+    mobileGrade: document.getElementById("mobileGrade"),
+    dailyGoalTarget: document.getElementById("dailyGoalTarget"),
+    dailyGoalDone: document.getElementById("dailyGoalDone"),
+    dailyGoalText: document.getElementById("dailyGoalText"),
+    dailyGoalBar: document.getElementById("dailyGoalBar"),
     topicList: document.getElementById("topicList"),
     curriculumGrid: document.getElementById("curriculumGrid"),
     domainSummary: document.getElementById("domainSummary"),
@@ -157,17 +295,45 @@
   init();
 
   function init() {
+    renderSubjectControls();
+    renderGradeControls();
     renderViewTabs();
     renderTopicList();
     renderCurriculumGrid();
     renderDomainSummary();
     bindEvents();
     setModeButtons();
+    updateSubjectTheme();
     nextQuestion();
     updateStats();
+    registerServiceWorker();
   }
 
   function bindEvents() {
+    els.subjectTabs.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-subject]");
+      if (!button) return;
+      changeCourse(button.dataset.subject, state.grade);
+    });
+
+    els.gradeSelect.addEventListener("change", () => changeCourse(state.subject, els.gradeSelect.value));
+    els.mobileSubject.addEventListener("change", () => changeCourse(els.mobileSubject.value, state.grade));
+    els.mobileGrade.addEventListener("change", () => changeCourse(state.subject, els.mobileGrade.value));
+    els.dailyGoalTarget.addEventListener("change", () => {
+      state.daily.target = Number(els.dailyGoalTarget.value);
+      saveDailyGoal();
+      renderDailyGoal();
+    });
+
+    document.querySelectorAll("[data-mobile-view]").forEach((button) => {
+      button.addEventListener("click", () => {
+        state.view = button.dataset.mobileView;
+        saveSettings();
+        renderViewTabs();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+    });
+
     document.querySelectorAll(".page-tab").forEach((button) => {
       button.addEventListener("click", () => {
         state.view = button.dataset.view;
@@ -252,6 +418,49 @@
     });
   }
 
+  function renderSubjectControls() {
+    const html = subjects.map((subject) => `
+      <button class="subject-tab" type="button" data-subject="${subject.id}" aria-pressed="${subject.id === state.subject ? "true" : "false"}">
+        <span>${subject.short}</span>
+        <strong>${subject.name}</strong>
+      </button>
+    `).join("");
+    els.subjectTabs.innerHTML = html;
+    els.mobileSubject.innerHTML = subjects.map((subject) => `<option value="${subject.id}">${subject.short} ${subject.name}</option>`).join("");
+    els.mobileSubject.value = state.subject;
+  }
+
+  function renderGradeControls() {
+    const html = grades.map((grade) => `<option value="${grade.id}">${grade.name}</option>`).join("");
+    els.gradeSelect.innerHTML = html;
+    els.mobileGrade.innerHTML = html;
+    els.gradeSelect.value = state.grade;
+    els.mobileGrade.value = state.grade;
+  }
+
+  function changeCourse(subjectId, gradeId) {
+    state.subject = subjectId;
+    state.grade = gradeId;
+    topics = buildTopics(state.subject, state.grade);
+    state.selectedTopic = topics[0].id;
+    state.mode = "practice";
+    state.view = "practice";
+    state.checked = false;
+    state.selectedChoice = null;
+    saveSettings();
+    renderSubjectControls();
+    renderGradeControls();
+    renderViewTabs();
+    setModeButtons();
+    updateSubjectTheme();
+    nextQuestion();
+    updateStats();
+  }
+
+  function updateSubjectTheme() {
+    document.body.dataset.subject = state.subject;
+  }
+
   function renderTopicList() {
     els.topicList.innerHTML = "";
     topics.forEach((topic) => {
@@ -264,7 +473,7 @@
       button.setAttribute("aria-selected", topic.id === state.selectedTopic ? "true" : "false");
       const mastery = getMastery(stats);
       button.innerHTML = `
-        <span class="topic-code">${topic.id}</span>
+        <span class="topic-code">${topicCode(topic)}</span>
         <span>
           <span class="topic-name">${topic.name}</span>
           <span class="topic-progress">${topic.domain}</span>
@@ -286,7 +495,7 @@
       card.dataset.topic = topic.id;
       card.innerHTML = `
         <div class="question-tags">
-          <span class="topic-pill">${topic.id}</span>
+          <span class="topic-pill">${topicCode(topic)}</span>
           <span class="meta-pill">${topic.domain}</span>
         </div>
         <h3>${topic.name}</h3>
@@ -328,7 +537,7 @@
         return `
           <article class="progress-card">
             <div>
-              <h3>${topic.id} ${topic.name}</h3>
+              <h3>${topicCode(topic)} ${topic.name}</h3>
               <p>${topic.domain} · ${answeredText}</p>
             </div>
             <strong>${formatAccuracy(stats)}</strong>
@@ -340,7 +549,7 @@
   }
 
   function updateStats() {
-    const totals = Object.values(state.progress).reduce(
+    const totals = topics.map((topic) => getTopicStats(topic.id)).reduce(
       (acc, item) => {
         acc.answered += item.answered || 0;
         acc.correct += item.correct || 0;
@@ -352,7 +561,7 @@
     els.answeredCount.textContent = String(totals.answered);
     els.accuracyRate.textContent = totals.answered ? `${Math.round((totals.correct / totals.answered) * 100)}%` : "--";
     els.streakCount.textContent = String(state.streak);
-    els.wrongBankCount.textContent = String(state.wrongBank.length);
+    els.wrongBankCount.textContent = String(state.wrongBank.filter((item) => item.subjectId === state.subject && item.gradeId === state.grade).length);
     const overall = totals.answered ? Math.round((totals.correct / totals.answered) * 100) : 0;
     els.overallRing.style.setProperty("--percent", String(overall));
     els.overallPercent.textContent = totals.answered ? `${overall}%` : "--";
@@ -365,13 +574,14 @@
     renderProgressGrid();
     renderSessionPanel();
     renderWeakList();
+    renderDailyGoal();
   }
 
   function renderSessionPanel() {
     const topic = getTopic(state.selectedTopic);
     const stats = getTopicStats(topic.id);
     const mastery = getMastery(stats);
-    els.activeTopicCode.textContent = topic.id;
+    els.activeTopicCode.textContent = topicCode(topic);
     els.activeTopicName.textContent = topic.name;
     els.activeTopicSummary.textContent = topic.summary;
     els.topicMasteryText.textContent = formatAccuracy(stats);
@@ -395,7 +605,7 @@
     const html = weak
       .map((entry) => `
         <div class="weak-item">
-          <span>${entry.topic.id} ${entry.topic.name}</span>
+          <span>${topicCode(entry.topic)} ${entry.topic.name}</span>
           <strong>${formatAccuracy(entry.stats)}</strong>
         </div>
       `)
@@ -441,18 +651,21 @@
     const generator = sample(topic.generators);
     return {
       topicId: topic.id,
+      topicCode: topicCode(topic),
       topicName: topic.name,
       domain: topic.domain,
       focus: topic.focus,
+      subjectId: topic.subjectId,
+      gradeId: topic.gradeId,
       ...generator(topic)
     };
   }
 
   function renderQuestion(question) {
-    els.unitLabel.textContent = `${question.topicId} ${question.topicName}`;
+    els.unitLabel.textContent = `${question.topicCode} ${question.topicName}`;
     els.modeLabel.textContent = modeName(state.mode);
     els.focusLabel.textContent = question.focus;
-    els.topicPill.textContent = question.topicId;
+    els.topicPill.textContent = question.topicCode;
     els.questionMetaPill.textContent = modeName(state.mode);
     els.questionTitle.textContent = question.title;
     els.questionText.innerHTML = question.prompt;
@@ -509,6 +722,7 @@
     const correct = isCorrect(question, userAnswer);
     state.checked = true;
     updateProgress(question.topicId, correct);
+    incrementDailyGoal();
     markChoices(question, userAnswer);
 
     if (correct) {
@@ -591,9 +805,11 @@
     if (!window.confirm("確定重設所有進度同錯題？")) return;
     state.progress = {};
     state.wrongBank = [];
+    state.daily = { date: todayKey(), target: state.daily.target || 10, done: 0 };
     state.streak = 0;
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem(WRONG_KEY);
+    saveDailyGoal();
     updateStats();
     nextQuestion();
   }
@@ -624,6 +840,14 @@
     return "專題";
   }
 
+  function topicCode(topic) {
+    return topic.originalId || topic.id;
+  }
+
+  function todayKey() {
+    return new Date().toISOString().slice(0, 10);
+  }
+
   function choiceIndexFromKey(key) {
     const normalized = String(key).toLowerCase();
     if (/^[1-4]$/.test(normalized)) return Number(normalized) - 1;
@@ -652,10 +876,51 @@
 
   function saveSettings() {
     localStorage.setItem(SETTINGS_KEY, JSON.stringify({
+      subject: state.subject,
+      grade: state.grade,
       selectedTopic: state.selectedTopic,
       mode: state.mode,
       view: state.view
     }));
+  }
+
+  function loadDailyGoal() {
+    const fallback = { date: todayKey(), target: 10, done: 0 };
+    try {
+      const stored = JSON.parse(localStorage.getItem(DAILY_KEY) || "null");
+      if (!stored || stored.date !== todayKey()) return fallback;
+      return {
+        date: stored.date,
+        target: Number(stored.target) || 10,
+        done: Number(stored.done) || 0
+      };
+    } catch {
+      return fallback;
+    }
+  }
+
+  function saveDailyGoal() {
+    localStorage.setItem(DAILY_KEY, JSON.stringify(state.daily));
+  }
+
+  function incrementDailyGoal() {
+    if (state.daily.date !== todayKey()) {
+      state.daily = { date: todayKey(), target: state.daily.target || 10, done: 0 };
+    }
+    state.daily.done += 1;
+    saveDailyGoal();
+  }
+
+  function renderDailyGoal() {
+    if (state.daily.date !== todayKey()) {
+      state.daily = { date: todayKey(), target: state.daily.target || 10, done: 0 };
+      saveDailyGoal();
+    }
+    const percent = Math.min(100, Math.round((state.daily.done / state.daily.target) * 100));
+    els.dailyGoalTarget.value = String(state.daily.target);
+    els.dailyGoalText.textContent = `今日 ${state.daily.done} / ${state.daily.target} 題`;
+    els.dailyGoalDone.textContent = percent >= 100 ? "已達標" : `尚差 ${Math.max(0, state.daily.target - state.daily.done)} 題`;
+    els.dailyGoalBar.style.width = `${percent}%`;
   }
 
   function loadSettings() {
@@ -664,6 +929,11 @@
     } catch {
       return {};
     }
+  }
+
+  function registerServiceWorker() {
+    if (!("serviceWorker" in navigator)) return;
+    navigator.serviceWorker.register("./sw.js").catch(() => {});
   }
 
   function loadProgress() {
@@ -696,8 +966,9 @@
   }
 
   function drawWrongQuestion() {
-    if (!state.wrongBank.length) return null;
-    return { ...sample(state.wrongBank) };
+    const scoped = state.wrongBank.filter((item) => item.subjectId === state.subject && item.gradeId === state.grade);
+    if (!scoped.length) return null;
+    return { ...sample(scoped) };
   }
 
   function getTopic(id) {
@@ -808,6 +1079,130 @@
 
   function formatNumber(value) {
     return Number(value).toLocaleString("en-US");
+  }
+
+  function gradeLevel(gradeId) {
+    if (gradeId.startsWith("P")) return Number(gradeId.slice(1));
+    return 6 + Number(gradeId.slice(1));
+  }
+
+  function genericQuestion(topic) {
+    if (topic.subjectId === "chinese") return chineseQuestion(topic);
+    if (topic.subjectId === "english") return englishQuestion(topic);
+    return mathQuestion(topic);
+  }
+
+  function chineseQuestion(topic) {
+    const level = gradeLevel(topic.gradeId);
+    const readingItems = level <= 3
+      ? [
+          ["「小狗在門口搖尾巴。」這句主要寫甚麼？", "小狗的動作", ["天氣", "時間", "地點"], "題目中的重點是「小狗」和「搖尾巴」，所以主要寫小狗的動作。"],
+          ["「妹妹把書包放在椅子上。」誰把書包放好？", "妹妹", ["哥哥", "老師", "媽媽"], "句子的主語是妹妹。"]
+        ]
+      : [
+          ["文章標題若是《一次難忘的比賽》，最可能屬於哪一類文章？", "記敘文", ["說明文", "議論文", "書信"], "題目含有事件和經歷，通常以記敘為主。"],
+          ["閱讀時要概括段意，最重要先找甚麼？", "中心句或重點事件", ["生字筆畫", "標點數量", "作者姓名"], "段意要抓住該段最核心的意思。"]
+        ];
+    const writingItems = [
+      ["「因為下雨，____ 我帶了雨傘。」橫線應填入甚麼？", "所以", ["但是", "如果", "雖然"], "「因為……所以……」表示因果關係。"],
+      ["寫作開首最需要做到甚麼？", "交代人物、時間、地點或事情", ["只寫結尾", "重複題目十次", "完全不用標點"], "清楚交代背景，讀者才容易明白。"]
+    ];
+    const wordItems = [
+      ["「安靜」的相反詞較接近哪一個？", "吵鬧", ["整齊", "明亮", "寒冷"], "安靜與吵鬧意思相反。"],
+      ["「專心」較適合形容哪一種情況？", "認真做功課", ["四處奔跑", "胡亂塗寫", "大聲爭吵"], "專心表示集中精神。"]
+    ];
+    const seniorItems = [
+      ["議論文的論點應該怎樣？", "清楚表明立場", ["只列出故事人物", "避免任何例子", "只寫景物"], "論點是議論文的核心，需要清楚可辯。"],
+      ["文言文翻譯時，最應先掌握甚麼？", "關鍵字詞和句子關係", ["字體顏色", "篇幅長短", "標題裝飾"], "理解關鍵詞和句式，才能準確翻譯。"]
+    ];
+    const pool = level >= 10 ? seniorItems : topic.name.includes("寫") ? writingItems : topic.name.includes("字") || topic.name.includes("語文") ? wordItems : readingItems;
+    const item = sample(pool);
+    return makeChoiceQuestion({
+      topicId: topic.id,
+      title: topic.name,
+      prompt: item[0],
+      hint: "先找題目關鍵詞，再判斷它問的是內容、語文知識還是表達方法。",
+      work: item[3]
+    }, item[1], item[2]);
+  }
+
+  function englishQuestion(topic) {
+    const level = gradeLevel(topic.gradeId);
+    const primary = [
+      ["Choose the correct word: She ____ to school every day.", "goes", ["go", "going", "went"], "For he/she/it in the simple present tense, add -s or -es: she goes."],
+      ["Which word is an adjective?", "happy", ["run", "quickly", "school"], "An adjective describes a noun or a person."],
+      ["Choose the best response: How are you?", "I'm fine, thank you.", ["It is a pencil.", "At seven o'clock.", "In the box."], "The question asks about someone's condition."]
+    ];
+    const junior = [
+      ["Choose the correct tense: I ____ my homework before dinner yesterday.", "finished", ["finish", "finishes", "will finish"], "Yesterday shows the past tense, so use finished."],
+      ["Which connector shows contrast?", "however", ["because", "therefore", "firstly"], "However introduces a contrasting idea."],
+      ["What is the main purpose of a topic sentence?", "To show the main idea of a paragraph", ["To end the whole essay", "To list every example", "To replace punctuation"], "A topic sentence guides the paragraph."]
+    ];
+    const senior = [
+      ["Which phrase is most suitable for a formal argumentative essay?", "It can be argued that", ["You know what", "Loads of people say", "This is super cool"], "Formal writing avoids casual speech and uses precise phrasing."],
+      ["In reading comprehension, evidence-based answers should include what?", "Relevant textual support", ["Only personal feelings", "A copied title only", "Random examples"], "Evidence from the text supports the answer."],
+      ["Choose the more precise verb: The report ____ several causes of the problem.", "identifies", ["does", "gets", "makes"], "Identifies precisely means points out or recognizes."]
+    ];
+    const item = sample(level <= 6 ? primary : level <= 9 ? junior : senior);
+    return makeChoiceQuestion({
+      topicId: topic.id,
+      title: topic.name,
+      prompt: item[0],
+      hint: "Look at the keywords in the sentence and decide the grammar, meaning or text purpose.",
+      work: item[3]
+    }, item[1], item[2]);
+  }
+
+  function mathQuestion(topic) {
+    const level = gradeLevel(topic.gradeId);
+    if (level <= 3) {
+      const a = randInt(8, 80);
+      const b = randInt(3, 40);
+      const result = a + b;
+      return makeChoiceQuestion({
+        topicId: topic.id,
+        title: topic.name,
+        prompt: `${a} + ${b} = ?`,
+        hint: "先加個位，再加十位。",
+        work: `${a} + ${b} = ${result}。`
+      }, String(result), [String(result + 1), String(Math.max(1, result - 1)), String(a - b)]);
+    }
+    if (level <= 6) {
+      const a = randInt(12, 99);
+      const b = randInt(3, 12);
+      const result = a * b;
+      return makeChoiceQuestion({
+        topicId: topic.id,
+        title: topic.name,
+        prompt: `${a} × ${b} = ?`,
+        hint: "可把較大的數拆開，例如十位和個位分開乘。",
+        work: `${a} × ${b} = ${result}。`
+      }, String(result), [String(result + b), String(Math.max(1, result - b)), String(a + b)]);
+    }
+    if (level <= 9) {
+      const x = randInt(2, 12);
+      const a = randInt(2, 8);
+      const b = randInt(3, 20);
+      const total = a * x + b;
+      return makeChoiceQuestion({
+        topicId: topic.id,
+        title: topic.name,
+        prompt: `解方程：${a}x + ${b} = ${total}`,
+        hint: "先減常數項，再除以 x 的係數。",
+        work: `${a}x = ${total - b}，x = ${x}。`
+      }, String(x), [String(x + 1), String(Math.max(1, x - 1)), String(total)]);
+    }
+    const m = randInt(2, 8);
+    const c = randInt(-6, 8);
+    const x = randInt(1, 8);
+    const y = m * x + c;
+    return makeChoiceQuestion({
+      topicId: topic.id,
+      title: topic.name,
+      prompt: `若 f(x) = ${m}x ${c >= 0 ? "+" : "-"} ${Math.abs(c)}，求 f(${x})。`,
+      hint: `把 x 換成 ${x}，再按次序計算。`,
+      work: `f(${x}) = ${m} × ${x} ${c >= 0 ? "+" : "-"} ${Math.abs(c)} = ${y}。`
+    }, String(y), [String(y + m), String(y - m), String(m + x + c)]);
   }
 
   function largeNumberCompare(topic) {

@@ -4,7 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#287a58">
-  <title>小五數學溫習器</title>
+  <title>核心科溫習器</title>
+  <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -19,9 +20,9 @@
           <path d="M15 18h6m-3-3v6M42 18h8M15 46h8m-4-4v8M42 42l8 8m0-8-8 8"></path>
         </svg>
         <div>
-          <span class="kicker">P5 Math Lab</span>
-          <h1>小五數學溫習器</h1>
-          <p>香港小學五年級數學範圍</p>
+          <span class="kicker">Core Study Lab</span>
+          <h1>核心科溫習器</h1>
+          <p>小一至中六 · 中英數練習</p>
         </div>
       </div>
       <div class="score-strip" aria-label="溫習進度">
@@ -49,6 +50,35 @@
       <button class="page-tab" type="button" data-view="curriculum">單元地圖</button>
       <button class="page-tab" type="button" data-view="progress">進度報告</button>
     </nav>
+
+    <section class="control-deck" aria-label="科目和年級">
+      <div>
+        <span class="kicker">Subject</span>
+        <div id="subjectTabs" class="subject-tabs" role="radiogroup" aria-label="選擇科目"></div>
+      </div>
+      <label class="grade-picker">
+        <span class="kicker">Grade</span>
+        <select id="gradeSelect" aria-label="選擇年級"></select>
+      </label>
+      <section class="daily-goal" aria-label="每日目標">
+        <div>
+          <span class="kicker">Daily Goal</span>
+          <strong id="dailyGoalText">今日 0 / 10 題</strong>
+        </div>
+        <label>
+          <span>目標</span>
+          <select id="dailyGoalTarget" aria-label="每日目標題數">
+            <option value="5">5 題</option>
+            <option value="10" selected>10 題</option>
+            <option value="15">15 題</option>
+            <option value="20">20 題</option>
+            <option value="30">30 題</option>
+          </select>
+        </label>
+        <div class="progress-track" aria-hidden="true"><span id="dailyGoalBar"></span></div>
+        <span id="dailyGoalDone" class="daily-status">未開始</span>
+      </section>
+    </section>
 
     <main>
       <section id="practiceView" class="app-view active" data-view-panel="practice">
@@ -103,7 +133,7 @@
             <section class="session-panel" aria-label="目前單元進度">
               <div>
                 <span id="activeTopicCode" class="topic-pill">5N1</span>
-                <h2 id="activeTopicName">多位數</h2>
+                  <h2 id="activeTopicName">多位數</h2>
                 <p id="activeTopicSummary">比較多位數大小，按千、萬、十萬、百萬、千萬或億取近似值。</p>
               </div>
               <div class="mastery-block">
@@ -191,8 +221,15 @@
     </main>
 
     <footer class="source-note">
-      範圍按教育局《<a href="https://www.edb.gov.hk/attachment/tc/curriculum-development/kla/ma/curr/pmc2017_tc.pdf" target="_blank" rel="noopener">數學教育學習領域課程指引補充文件：小學數學科學習內容</a>》（2017）小五單元整理。
+      範圍參考教育局中國語文、英國語文及數學教育學習領域課程文件整理；數學小五單元按《<a href="https://www.edb.gov.hk/attachment/tc/curriculum-development/kla/ma/curr/pmc2017_tc.pdf" target="_blank" rel="noopener">小學數學科學習內容</a>》（2017）細分。
     </footer>
+  </div>
+
+  <div class="mobile-dock" aria-label="手機快速操作">
+    <select id="mobileSubject" aria-label="手機科目選擇"></select>
+    <select id="mobileGrade" aria-label="手機年級選擇"></select>
+    <button type="button" data-mobile-view="practice">練習</button>
+    <button type="button" data-mobile-view="progress">進度</button>
   </div>
 
   <script src="app.js"></script>
