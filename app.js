@@ -3,6 +3,7 @@
 
   const STORAGE_KEY = "p5MathReviewProgress.v1";
   const WRONG_KEY = "p5MathReviewWrongBank.v1";
+  const SETTINGS_KEY = "p5MathReviewSettings.v1";
 
   const topics = [
     {
@@ -103,9 +104,12 @@
     }
   ];
 
+  const savedSettings = loadSettings();
+
   let state = {
-    selectedTopic: "5N1",
-    mode: "practice",
+    selectedTopic: savedSettings.selectedTopic || "5N1",
+    mode: savedSettings.mode || "practice",
+    view: savedSettings.view || "practice",
     current: null,
     selectedChoice: null,
     checked: false,
@@ -118,12 +122,26 @@
     answeredCount: document.getElementById("answeredCount"),
     accuracyRate: document.getElementById("accuracyRate"),
     streakCount: document.getElementById("streakCount"),
+    wrongBankCount: document.getElementById("wrongBankCount"),
     topicList: document.getElementById("topicList"),
     curriculumGrid: document.getElementById("curriculumGrid"),
+    domainSummary: document.getElementById("domainSummary"),
+    topicProgressGrid: document.getElementById("topicProgressGrid"),
+    overallRing: document.getElementById("overallRing"),
+    overallPercent: document.getElementById("overallPercent"),
+    progressSummary: document.getElementById("progressSummary"),
+    miniWeakList: document.getElementById("miniWeakList"),
     weakList: document.getElementById("weakList"),
     unitLabel: document.getElementById("unitLabel"),
+    modeLabel: document.getElementById("modeLabel"),
     focusLabel: document.getElementById("focusLabel"),
+    activeTopicCode: document.getElementById("activeTopicCode"),
+    activeTopicName: document.getElementById("activeTopicName"),
+    activeTopicSummary: document.getElementById("activeTopicSummary"),
+    topicMasteryText: document.getElementById("topicMasteryText"),
+    topicMasteryBar: document.getElementById("topicMasteryBar"),
     topicPill: document.getElementById("topicPill"),
+    questionMetaPill: document.getElementById("questionMetaPill"),
     questionTitle: document.getElementById("questionTitle"),
     questionText: document.getElementById("questionText"),
     diagramArea: document.getElementById("diagramArea"),
@@ -139,27 +157,57 @@
   init();
 
   function init() {
+    renderViewTabs();
     renderTopicList();
     renderCurriculumGrid();
+    renderDomainSummary();
     bindEvents();
+    setModeButtons();
     nextQuestion();
     updateStats();
   }
 
   function bindEvents() {
+    document.querySelectorAll(".page-tab").forEach((button) => {
+      button.addEventListener("click", () => {
+        state.view = button.dataset.view;
+        saveSettings();
+        renderViewTabs();
+      });
+    });
+
     els.topicList.addEventListener("click", (event) => {
       const button = event.target.closest(".topic-button");
       if (!button) return;
       state.selectedTopic = button.dataset.topic;
       state.mode = "practice";
+      state.view = "practice";
+      saveSettings();
+      renderViewTabs();
       setModeButtons();
       renderTopicList();
+      renderSessionPanel();
+      nextQuestion();
+    });
+
+    els.curriculumGrid.addEventListener("click", (event) => {
+      const card = event.target.closest(".curriculum-card");
+      if (!card) return;
+      state.selectedTopic = card.dataset.topic;
+      state.mode = "practice";
+      state.view = "practice";
+      saveSettings();
+      renderViewTabs();
+      setModeButtons();
+      renderTopicList();
+      renderSessionPanel();
       nextQuestion();
     });
 
     document.querySelectorAll(".segment").forEach((button) => {
       button.addEventListener("click", () => {
         state.mode = button.dataset.mode;
+        saveSettings();
         setModeButtons();
         nextQuestion();
       });
@@ -172,11 +220,35 @@
     els.resetProgress.addEventListener("click", resetProgress);
 
     document.addEventListener("keydown", (event) => {
+      if (state.current?.type === "choice") {
+        const index = choiceIndexFromKey(event.key);
+        if (index >= 0) {
+          const choices = els.answerArea.querySelectorAll(".choice-button");
+          if (choices[index]) {
+            choices[index].click();
+            event.preventDefault();
+          }
+        }
+      }
+
       if (event.key !== "Enter") return;
       const active = document.activeElement;
       if (active && active.classList.contains("answer-input")) {
         checkCurrentAnswer();
+      } else if (state.current?.type === "choice" && state.selectedChoice) {
+        checkCurrentAnswer();
       }
+    });
+  }
+
+  function renderViewTabs() {
+    document.querySelectorAll(".page-tab").forEach((button) => {
+      const active = button.dataset.view === state.view;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-current", active ? "page" : "false");
+    });
+    document.querySelectorAll("[data-view-panel]").forEach((panel) => {
+      panel.classList.toggle("active", panel.dataset.viewPanel === state.view);
     });
   }
 
@@ -190,6 +262,7 @@
       button.className = `topic-button${topic.id === state.selectedTopic ? " active" : ""}`;
       button.setAttribute("role", "option");
       button.setAttribute("aria-selected", topic.id === state.selectedTopic ? "true" : "false");
+      const mastery = getMastery(stats);
       button.innerHTML = `
         <span class="topic-code">${topic.id}</span>
         <span>
@@ -197,6 +270,7 @@
           <span class="topic-progress">${topic.domain}</span>
         </span>
         <span class="topic-accuracy">${formatAccuracy(stats)}</span>
+        <span class="topic-mini-track" aria-hidden="true"><span style="width: ${mastery}%"></span></span>
       `;
       els.topicList.appendChild(button);
     });
@@ -205,11 +279,64 @@
   function renderCurriculumGrid() {
     els.curriculumGrid.innerHTML = "";
     topics.forEach((topic) => {
+      const stats = getTopicStats(topic.id);
+      const mastery = getMastery(stats);
       const card = document.createElement("article");
       card.className = "curriculum-card";
-      card.innerHTML = `<h3>${topic.id} ${topic.name}</h3><p>${topic.summary}</p>`;
+      card.dataset.topic = topic.id;
+      card.innerHTML = `
+        <div class="question-tags">
+          <span class="topic-pill">${topic.id}</span>
+          <span class="meta-pill">${topic.domain}</span>
+        </div>
+        <h3>${topic.name}</h3>
+        <p>${topic.summary}</p>
+        <div class="progress-track" aria-hidden="true"><span style="width: ${mastery}%"></span></div>
+      `;
       els.curriculumGrid.appendChild(card);
     });
+  }
+
+  function renderDomainSummary() {
+    const domains = topics.reduce((acc, topic) => {
+      if (!acc[topic.domain]) acc[topic.domain] = [];
+      acc[topic.domain].push(topic);
+      return acc;
+    }, {});
+
+    els.domainSummary.innerHTML = Object.entries(domains)
+      .map(([domain, items]) => {
+        const answered = items.reduce((sum, topic) => sum + getTopicStats(topic.id).answered, 0);
+        const correct = items.reduce((sum, topic) => sum + getTopicStats(topic.id).correct, 0);
+        const accuracy = answered ? `${Math.round((correct / answered) * 100)}%` : "--";
+        return `
+          <article class="domain-card">
+            <strong>${domain}</strong>
+            <span>${items.length} 個單元 · 已答 ${answered} 題 · 準確率 ${accuracy}</span>
+          </article>
+        `;
+      })
+      .join("");
+  }
+
+  function renderProgressGrid() {
+    els.topicProgressGrid.innerHTML = topics
+      .map((topic) => {
+        const stats = getTopicStats(topic.id);
+        const mastery = getMastery(stats);
+        const answeredText = stats.answered ? `已答 ${stats.answered} 題` : "未開始";
+        return `
+          <article class="progress-card">
+            <div>
+              <h3>${topic.id} ${topic.name}</h3>
+              <p>${topic.domain} · ${answeredText}</p>
+            </div>
+            <strong>${formatAccuracy(stats)}</strong>
+            <div class="progress-track" aria-hidden="true"><span style="width: ${mastery}%"></span></div>
+          </article>
+        `;
+      })
+      .join("");
   }
 
   function updateStats() {
@@ -225,8 +352,30 @@
     els.answeredCount.textContent = String(totals.answered);
     els.accuracyRate.textContent = totals.answered ? `${Math.round((totals.correct / totals.answered) * 100)}%` : "--";
     els.streakCount.textContent = String(state.streak);
+    els.wrongBankCount.textContent = String(state.wrongBank.length);
+    const overall = totals.answered ? Math.round((totals.correct / totals.answered) * 100) : 0;
+    els.overallRing.style.setProperty("--percent", String(overall));
+    els.overallPercent.textContent = totals.answered ? `${overall}%` : "--";
+    els.progressSummary.textContent = totals.answered
+      ? `已完成 ${totals.answered} 題，答對 ${totals.correct} 題。`
+      : "未有答題紀錄。";
     renderTopicList();
+    renderCurriculumGrid();
+    renderDomainSummary();
+    renderProgressGrid();
+    renderSessionPanel();
     renderWeakList();
+  }
+
+  function renderSessionPanel() {
+    const topic = getTopic(state.selectedTopic);
+    const stats = getTopicStats(topic.id);
+    const mastery = getMastery(stats);
+    els.activeTopicCode.textContent = topic.id;
+    els.activeTopicName.textContent = topic.name;
+    els.activeTopicSummary.textContent = topic.summary;
+    els.topicMasteryText.textContent = formatAccuracy(stats);
+    els.topicMasteryBar.style.width = `${mastery}%`;
   }
 
   function renderWeakList() {
@@ -237,11 +386,13 @@
       .slice(0, 4);
 
     if (!weak.length) {
-      els.weakList.textContent = "答多幾題後，呢度會列出需要重溫嘅單元。";
+      const text = "暫未有弱項紀錄。";
+      els.weakList.textContent = text;
+      els.miniWeakList.textContent = text;
       return;
     }
 
-    els.weakList.innerHTML = weak
+    const html = weak
       .map((entry) => `
         <div class="weak-item">
           <span>${entry.topic.id} ${entry.topic.name}</span>
@@ -249,12 +400,17 @@
         </div>
       `)
       .join("");
+    els.weakList.innerHTML = html;
+    els.miniWeakList.innerHTML = html;
   }
 
   function setModeButtons() {
     document.querySelectorAll(".segment").forEach((button) => {
-      button.classList.toggle("active", button.dataset.mode === state.mode);
+      const active = button.dataset.mode === state.mode;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-pressed", active ? "true" : "false");
     });
+    els.modeLabel.textContent = modeName(state.mode);
   }
 
   function nextQuestion() {
@@ -272,7 +428,7 @@
         showInlineMessage("暫時未有錯題，已返回專題練習。", "hint");
       }
     } else if (state.mode === "mixed") {
-      question = generateQuestion(sample(topics));
+      question = generateQuestion(pickMixedTopic());
     } else {
       question = generateQuestion(getTopic(state.selectedTopic));
     }
@@ -294,8 +450,10 @@
 
   function renderQuestion(question) {
     els.unitLabel.textContent = `${question.topicId} ${question.topicName}`;
+    els.modeLabel.textContent = modeName(state.mode);
     els.focusLabel.textContent = question.focus;
     els.topicPill.textContent = question.topicId;
+    els.questionMetaPill.textContent = modeName(state.mode);
     els.questionTitle.textContent = question.title;
     els.questionText.innerHTML = question.prompt;
     els.diagramArea.innerHTML = question.diagram || "";
@@ -307,7 +465,8 @@
         button.type = "button";
         button.className = "choice-button";
         button.dataset.value = choice.value;
-        button.innerHTML = `<span>${String.fromCharCode(65 + index)}. </span>${choice.label}`;
+        button.setAttribute("aria-pressed", "false");
+        button.innerHTML = `<span class="choice-letter">${String.fromCharCode(65 + index)}</span><span>${choice.label}</span>`;
         button.addEventListener("click", () => selectChoice(button, choice.value));
         els.answerArea.appendChild(button);
       });
@@ -326,8 +485,12 @@
   function selectChoice(button, value) {
     if (state.checked) return;
     state.selectedChoice = value;
-    els.answerArea.querySelectorAll(".choice-button").forEach((item) => item.classList.remove("selected"));
+    els.answerArea.querySelectorAll(".choice-button").forEach((item) => {
+      item.classList.remove("selected");
+      item.setAttribute("aria-pressed", "false");
+    });
     button.classList.add("selected");
+    button.setAttribute("aria-pressed", "true");
   }
 
   function checkCurrentAnswer() {
@@ -364,6 +527,7 @@
   function markChoices(question, userAnswer) {
     if (question.type !== "choice") return;
     els.answerArea.querySelectorAll(".choice-button").forEach((button) => {
+      button.disabled = true;
       if (String(button.dataset.value) === String(question.answer)) {
         button.classList.add("correct");
       } else if (String(button.dataset.value) === String(userAnswer)) {
@@ -445,6 +609,61 @@
 
   function accuracyValue(stats) {
     return stats.answered ? stats.correct / stats.answered : 1;
+  }
+
+  function getMastery(stats) {
+    if (!stats.answered) return 0;
+    const accuracy = stats.correct / stats.answered;
+    const confidence = Math.min(stats.answered / 8, 1);
+    return Math.round(accuracy * confidence * 100);
+  }
+
+  function modeName(mode) {
+    if (mode === "mixed") return "綜合";
+    if (mode === "wrong") return "錯題";
+    return "專題";
+  }
+
+  function choiceIndexFromKey(key) {
+    const normalized = String(key).toLowerCase();
+    if (/^[1-4]$/.test(normalized)) return Number(normalized) - 1;
+    return ["a", "b", "c", "d"].indexOf(normalized);
+  }
+
+  function pickMixedTopic() {
+    const weighted = topics.map((topic) => {
+      const stats = getTopicStats(topic.id);
+      const accuracyGap = stats.answered ? 1 - accuracyValue(stats) : 0.45;
+      const wrongBoost = state.wrongBank.some((item) => item.topicId === topic.id) ? 1.25 : 0;
+      const freshBoost = stats.answered ? 0 : 0.75;
+      return {
+        topic,
+        weight: 1 + accuracyGap * 3 + wrongBoost + freshBoost
+      };
+    });
+    const total = weighted.reduce((sum, item) => sum + item.weight, 0);
+    let cursor = Math.random() * total;
+    for (const item of weighted) {
+      cursor -= item.weight;
+      if (cursor <= 0) return item.topic;
+    }
+    return sample(topics);
+  }
+
+  function saveSettings() {
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify({
+      selectedTopic: state.selectedTopic,
+      mode: state.mode,
+      view: state.view
+    }));
+  }
+
+  function loadSettings() {
+    try {
+      return JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}");
+    } catch {
+      return {};
+    }
   }
 
   function loadProgress() {

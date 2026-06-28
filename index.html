@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#287a58">
   <title>小五數學溫習器</title>
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -18,6 +19,7 @@
           <path d="M15 18h6m-3-3v6M42 18h8M15 46h8m-4-4v8M42 42l8 8m0-8-8 8"></path>
         </svg>
         <div>
+          <span class="kicker">P5 Math Lab</span>
           <h1>小五數學溫習器</h1>
           <p>香港小學五年級數學範圍</p>
         </div>
@@ -35,74 +37,153 @@
           <span id="streakCount">0</span>
           <small>連對</small>
         </div>
+        <div>
+          <span id="wrongBankCount">0</span>
+          <small>錯題</small>
+        </div>
       </div>
     </header>
 
-    <main class="workspace">
-      <aside class="sidebar">
-        <section class="panel">
-          <div class="panel-title">
-            <span>範疇</span>
-            <button id="resetProgress" class="icon-button" type="button" title="重設進度" aria-label="重設進度">↻</button>
-          </div>
-          <div id="topicList" class="topic-list" role="listbox" aria-label="選擇溫習範疇"></div>
-        </section>
+    <nav class="page-tabs" aria-label="主要分頁">
+      <button class="page-tab active" type="button" data-view="practice">練習台</button>
+      <button class="page-tab" type="button" data-view="curriculum">單元地圖</button>
+      <button class="page-tab" type="button" data-view="progress">進度報告</button>
+    </nav>
 
-        <section class="panel compact">
-          <div class="panel-title">模式</div>
-          <div class="segmented" role="radiogroup" aria-label="練習模式">
-            <button class="segment active" type="button" data-mode="practice">專題</button>
-            <button class="segment" type="button" data-mode="mixed">綜合</button>
-            <button class="segment" type="button" data-mode="wrong">錯題</button>
-          </div>
-        </section>
+    <main>
+      <section id="practiceView" class="app-view active" data-view-panel="practice">
+        <div class="workspace">
+          <aside class="sidebar">
+            <section class="panel">
+              <div class="panel-title">
+                <span>範疇</span>
+                <button id="resetProgress" class="icon-button" type="button" title="重設進度" aria-label="重設進度">↻</button>
+              </div>
+              <div id="topicList" class="topic-list" role="listbox" aria-label="選擇溫習範疇"></div>
+            </section>
 
-        <section class="panel compact">
-          <div class="panel-title">本題資料</div>
-          <dl class="meta-list">
-            <div>
-              <dt>單元</dt>
-              <dd id="unitLabel">--</dd>
+            <section class="panel compact">
+              <div class="panel-title">模式</div>
+              <div class="segmented" role="radiogroup" aria-label="練習模式">
+                <button class="segment active" type="button" data-mode="practice">
+                  <span>專題</span>
+                  <small>目前單元</small>
+                </button>
+                <button class="segment" type="button" data-mode="mixed">
+                  <span>綜合</span>
+                  <small>全範圍</small>
+                </button>
+                <button class="segment" type="button" data-mode="wrong">
+                  <span>錯題</span>
+                  <small>重做</small>
+                </button>
+              </div>
+            </section>
+
+            <section class="panel compact">
+              <div class="panel-title">本題資料</div>
+              <dl class="meta-list">
+                <div>
+                  <dt>單元</dt>
+                  <dd id="unitLabel">--</dd>
+                </div>
+                <div>
+                  <dt>模式</dt>
+                  <dd id="modeLabel">--</dd>
+                </div>
+                <div>
+                  <dt>重點</dt>
+                  <dd id="focusLabel">--</dd>
+                </div>
+              </dl>
+            </section>
+          </aside>
+
+          <section class="practice-area">
+            <section class="session-panel" aria-label="目前單元進度">
+              <div>
+                <span id="activeTopicCode" class="topic-pill">5N1</span>
+                <h2 id="activeTopicName">多位數</h2>
+                <p id="activeTopicSummary">比較多位數大小，按千、萬、十萬、百萬、千萬或億取近似值。</p>
+              </div>
+              <div class="mastery-block">
+                <div class="mastery-head">
+                  <span>掌握度</span>
+                  <strong id="topicMasteryText">--</strong>
+                </div>
+                <div class="progress-track" aria-hidden="true">
+                  <span id="topicMasteryBar"></span>
+                </div>
+              </div>
+            </section>
+
+            <div class="question-panel">
+              <div class="question-head">
+                <div>
+                  <div class="question-tags">
+                    <span id="topicPill" class="topic-pill">5N1</span>
+                    <span id="questionMetaPill" class="meta-pill">專題</span>
+                  </div>
+                  <h2 id="questionTitle">準備題目中</h2>
+                </div>
+                <button id="newQuestion" class="secondary-button" type="button">下一題</button>
+              </div>
+
+              <div id="diagramArea" class="diagram-area" aria-live="polite"></div>
+              <p id="questionText" class="question-text"></p>
+
+              <div id="answerArea" class="answer-area"></div>
+
+              <div class="action-row">
+                <button id="checkAnswer" class="primary-button" type="button">批改</button>
+                <button id="showHint" class="ghost-button" type="button">提示</button>
+                <button id="skipQuestion" class="ghost-button" type="button">跳過</button>
+              </div>
+
+              <div id="feedbackBox" class="feedback" aria-live="polite"></div>
             </div>
-            <div>
-              <dt>重點</dt>
-              <dd id="focusLabel">--</dd>
-            </div>
-          </dl>
-        </section>
-      </aside>
 
-      <section class="practice-area">
-        <div class="question-panel">
-          <div class="question-head">
-            <div>
-              <span id="topicPill" class="topic-pill">5N1</span>
-              <h2 id="questionTitle">準備題目中</h2>
-            </div>
-            <button id="newQuestion" class="secondary-button" type="button">下一題</button>
-          </div>
-
-          <div id="diagramArea" class="diagram-area" aria-live="polite"></div>
-          <p id="questionText" class="question-text"></p>
-
-          <div id="answerArea" class="answer-area"></div>
-
-          <div class="action-row">
-            <button id="checkAnswer" class="primary-button" type="button">批改</button>
-            <button id="showHint" class="ghost-button" type="button">提示</button>
-            <button id="skipQuestion" class="ghost-button" type="button">跳過</button>
-          </div>
-
-          <div id="feedbackBox" class="feedback" aria-live="polite"></div>
+            <section class="panel compact">
+              <div class="panel-title">今日弱項</div>
+              <div id="miniWeakList" class="weak-list"></div>
+            </section>
+          </section>
         </div>
+      </section>
 
-        <div class="lower-grid">
+      <section id="curriculumView" class="app-view" data-view-panel="curriculum">
+        <div class="view-grid">
           <section class="panel">
-            <div class="panel-title">小五單元</div>
+            <div class="panel-title">小五單元地圖</div>
             <div id="curriculumGrid" class="curriculum-grid"></div>
           </section>
           <section class="panel">
-            <div class="panel-title">今日弱項</div>
+            <div class="panel-title">範疇分佈</div>
+            <div id="domainSummary" class="domain-summary"></div>
+          </section>
+        </div>
+      </section>
+
+      <section id="progressView" class="app-view" data-view-panel="progress">
+        <div class="progress-layout">
+          <section class="progress-hero panel">
+            <div class="progress-ring" id="overallRing" style="--percent: 0">
+              <span id="overallPercent">--</span>
+            </div>
+            <div>
+              <span class="kicker">Progress</span>
+              <h2>整體掌握度</h2>
+              <p id="progressSummary">未有答題紀錄。</p>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-title">單元進度</div>
+            <div id="topicProgressGrid" class="topic-progress-grid"></div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-title">優先重溫</div>
             <div id="weakList" class="weak-list"></div>
           </section>
         </div>
