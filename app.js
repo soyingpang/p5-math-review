@@ -261,6 +261,9 @@
     dailyGoalDone: document.getElementById("dailyGoalDone"),
     dailyGoalText: document.getElementById("dailyGoalText"),
     dailyGoalBar: document.getElementById("dailyGoalBar"),
+    mobileDailyGoalText: document.getElementById("mobileDailyGoalText"),
+    mobileDailyGoalDone: document.getElementById("mobileDailyGoalDone"),
+    mobileDailyGoalBar: document.getElementById("mobileDailyGoalBar"),
     topicList: document.getElementById("topicList"),
     curriculumGrid: document.getElementById("curriculumGrid"),
     domainSummary: document.getElementById("domainSummary"),
@@ -278,6 +281,7 @@
     activeTopicSummary: document.getElementById("activeTopicSummary"),
     topicMasteryText: document.getElementById("topicMasteryText"),
     topicMasteryBar: document.getElementById("topicMasteryBar"),
+    questionPanel: document.querySelector(".question-panel"),
     topicPill: document.getElementById("topicPill"),
     questionMetaPill: document.getElementById("questionMetaPill"),
     questionTitle: document.getElementById("questionTitle"),
@@ -289,12 +293,14 @@
     showHint: document.getElementById("showHint"),
     skipQuestion: document.getElementById("skipQuestion"),
     newQuestion: document.getElementById("newQuestion"),
+    nextQuestionCta: document.getElementById("nextQuestionCta"),
     resetProgress: document.getElementById("resetProgress")
   };
 
   init();
 
   function init() {
+    preferMobilePracticeStart();
     renderSubjectControls();
     renderGradeControls();
     renderViewTabs();
@@ -381,8 +387,9 @@
 
     els.checkAnswer.addEventListener("click", checkCurrentAnswer);
     els.showHint.addEventListener("click", showHint);
-    els.skipQuestion.addEventListener("click", nextQuestion);
-    els.newQuestion.addEventListener("click", nextQuestion);
+    els.skipQuestion.addEventListener("click", goToNextQuestion);
+    els.newQuestion.addEventListener("click", goToNextQuestion);
+    els.nextQuestionCta.addEventListener("click", goToNextQuestion);
     els.resetProgress.addEventListener("click", resetProgress);
 
     document.addEventListener("keydown", (event) => {
@@ -405,6 +412,13 @@
         checkCurrentAnswer();
       }
     });
+  }
+
+  function preferMobilePracticeStart() {
+    if (!window.matchMedia || !window.matchMedia("(max-width: 720px)").matches) return;
+    if (state.view === "practice") return;
+    state.view = "practice";
+    saveSettings();
   }
 
   function renderViewTabs() {
@@ -647,6 +661,29 @@
     renderQuestion(question);
   }
 
+  function goToNextQuestion() {
+    nextQuestion();
+    scrollQuestionIntoView();
+  }
+
+  function isMobileViewport() {
+    return window.matchMedia && window.matchMedia("(max-width: 720px)").matches;
+  }
+
+  function scrollQuestionIntoView() {
+    if (!isMobileViewport()) return;
+    requestAnimationFrame(() => {
+      els.questionPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
+
+  function scrollFeedbackIntoView() {
+    if (!isMobileViewport()) return;
+    requestAnimationFrame(() => {
+      els.feedbackBox.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+  }
+
   function generateQuestion(topic) {
     const generator = sample(topic.generators);
     return {
@@ -736,6 +773,9 @@
     }
 
     updateStats();
+    els.nextQuestionCta.hidden = false;
+    document.body.classList.add("answer-reviewed");
+    scrollFeedbackIntoView();
   }
 
   function markChoices(question, userAnswer) {
@@ -763,6 +803,8 @@
   function clearFeedback() {
     els.feedbackBox.innerHTML = "";
     els.feedbackBox.className = "feedback";
+    els.nextQuestionCta.hidden = true;
+    document.body.classList.remove("answer-reviewed");
   }
 
   function isCorrect(question, userAnswer) {
@@ -921,6 +963,9 @@
     els.dailyGoalText.textContent = `今日 ${state.daily.done} / ${state.daily.target} 題`;
     els.dailyGoalDone.textContent = percent >= 100 ? "已達標" : `尚差 ${Math.max(0, state.daily.target - state.daily.done)} 題`;
     els.dailyGoalBar.style.width = `${percent}%`;
+    els.mobileDailyGoalText.textContent = `今日 ${state.daily.done} / ${state.daily.target} 題`;
+    els.mobileDailyGoalDone.textContent = percent >= 100 ? "已達標" : `尚差 ${Math.max(0, state.daily.target - state.daily.done)} 題`;
+    els.mobileDailyGoalBar.style.width = `${percent}%`;
   }
 
   function loadSettings() {

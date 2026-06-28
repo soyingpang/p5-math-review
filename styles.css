@@ -271,6 +271,10 @@ select {
   font-weight: 900;
 }
 
+.mobile-daily-goal {
+  display: none;
+}
+
 .app-view {
   display: none;
   margin-top: 14px;
@@ -707,6 +711,22 @@ button:focus-visible {
   color: var(--ink);
 }
 
+.post-answer-next {
+  display: block;
+  width: 100%;
+  min-height: 50px;
+  margin-top: 12px;
+  border: 1px solid var(--green-dark);
+  border-radius: 8px;
+  background: var(--green);
+  color: #fff;
+  font-weight: 900;
+}
+
+.post-answer-next[hidden] {
+  display: none;
+}
+
 .view-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.35fr) minmax(260px, 0.65fr);
@@ -897,34 +917,111 @@ button:focus-visible {
 
 @media (max-width: 720px) {
   body {
-    padding-bottom: 74px;
+    padding-bottom: 62px;
   }
 
   .app-shell {
-    width: calc(100% - 24px);
-    padding: 0;
+    width: calc(100% - 16px);
+    padding: 8px 0;
   }
 
   .topbar,
-  .question-head,
   .progress-hero {
     align-items: stretch;
     flex-direction: column;
   }
 
-  .topbar,
-  .question-head {
+  .topbar {
     display: flex;
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .brand {
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .brand-mark {
+    width: 46px;
+    height: 46px;
+    flex: 0 0 46px;
+  }
+
+  h1 {
+    font-size: 2rem;
+    line-height: 1.05;
+  }
+
+  .brand p {
+    font-size: 0.95rem;
   }
 
   .score-strip,
   .page-tabs,
   .subject-tabs {
     min-width: 0;
-    grid-template-columns: 1fr;
+  }
+
+  .score-strip {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 5px;
+  }
+
+  .score-strip div {
+    min-height: 42px;
+    padding: 6px 4px;
+  }
+
+  .score-strip span {
+    font-size: 1rem;
+    line-height: 1;
+  }
+
+  .score-strip small {
+    margin-top: 3px;
+    font-size: 0.68rem;
+    white-space: nowrap;
+  }
+
+  .page-tabs {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px;
+    margin-top: 8px;
+    padding: 4px;
+  }
+
+  .page-tab {
+    min-height: 36px;
+    padding: 7px 4px;
+    font-size: 0.92rem;
+  }
+
+  .app-view {
+    margin-top: 8px;
   }
 
   .control-deck {
+    display: none;
+  }
+
+  .workspace {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .practice-area {
+    order: 1;
+    gap: 10px;
+  }
+
+  .sidebar {
+    order: 2;
+    gap: 10px;
+  }
+
+  .session-panel {
     display: none;
   }
 
@@ -949,8 +1046,75 @@ button:focus-visible {
     width: 100%;
   }
 
+  .question-panel {
+    padding: 14px;
+  }
+
+  .question-head {
+    display: block;
+  }
+
+  .question-head > .secondary-button {
+    display: none;
+  }
+
+  .question-head h2 {
+    margin-top: 8px;
+    font-size: 1.55rem;
+  }
+
+  .mobile-daily-goal {
+    display: grid;
+    gap: 7px;
+    margin-top: 10px;
+    padding: 10px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface-soft);
+  }
+
+  .mobile-daily-goal > div:first-child {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    font-weight: 900;
+  }
+
+  .mobile-daily-goal strong {
+    color: var(--green-dark);
+    white-space: nowrap;
+  }
+
+  .question-text {
+    margin-top: 12px;
+    font-size: 1.16rem;
+  }
+
+  .answer-area {
+    margin-top: 12px;
+    gap: 8px;
+  }
+
+  .choice-button {
+    min-height: 50px;
+    padding: 10px 11px;
+  }
+
   .action-row {
     display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .action-row .primary-button {
+    grid-column: 1 / -1;
+  }
+
+  .feedback {
+    margin-top: 12px;
+    padding: 12px;
   }
 
   .progress-card {
@@ -972,28 +1136,35 @@ button:focus-visible {
     bottom: 0;
     z-index: 20;
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 6px;
+    grid-template-columns: minmax(106px, 1.2fr) minmax(70px, 0.75fr) minmax(54px, 0.55fr) minmax(54px, 0.55fr);
+    gap: 5px;
     width: 100%;
-    padding: 8px;
+    padding: 6px 8px;
     border-top: 1px solid var(--line);
     background: rgba(255, 255, 255, 0.96);
   }
 
   .mobile-dock button,
   .mobile-dock select {
-    min-height: 40px;
+    min-width: 0;
+    min-height: 38px;
     border: 1px solid var(--line);
     border-radius: 8px;
     background: #fff;
     color: var(--ink);
+    padding: 0 6px;
+    font-size: 0.9rem;
     font-weight: 900;
+  }
+
+  .mobile-dock button {
+    padding: 0 4px;
   }
 }
 
 @media (max-width: 480px) {
   .score-strip {
     width: 100%;
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }

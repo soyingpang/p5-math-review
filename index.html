@@ -159,6 +159,14 @@
                 <button id="newQuestion" class="secondary-button" type="button">下一題</button>
               </div>
 
+              <div class="mobile-daily-goal" aria-label="每日目標進度">
+                <div>
+                  <span id="mobileDailyGoalText">今日 0 / 10 題</span>
+                  <strong id="mobileDailyGoalDone">尚差 10 題</strong>
+                </div>
+                <div class="progress-track" aria-hidden="true"><span id="mobileDailyGoalBar"></span></div>
+              </div>
+
               <div id="diagramArea" class="diagram-area" aria-live="polite"></div>
               <p id="questionText" class="question-text"></p>
 
@@ -171,6 +179,7 @@
               </div>
 
               <div id="feedbackBox" class="feedback" aria-live="polite"></div>
+              <button id="nextQuestionCta" class="post-answer-next" type="button" hidden>下一題</button>
             </div>
 
             <section class="panel compact">
