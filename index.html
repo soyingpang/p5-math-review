@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="zh-Hant-HK">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>小五數學溫習器</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true">
+          <rect x="8" y="8" width="20" height="20" rx="5"></rect>
+          <rect x="36" y="8" width="20" height="20" rx="5"></rect>
+          <rect x="8" y="36" width="20" height="20" rx="5"></rect>
+          <rect x="36" y="36" width="20" height="20" rx="5"></rect>
+          <path d="M15 18h6m-3-3v6M42 18h8M15 46h8m-4-4v8M42 42l8 8m0-8-8 8"></path>
+        </svg>
+        <div>
+          <h1>小五數學溫習器</h1>
+          <p>香港小學五年級數學範圍</p>
+        </div>
+      </div>
+      <div class="score-strip" aria-label="溫習進度">
+        <div>
+          <span id="answeredCount">0</span>
+          <small>已答</small>
+        </div>
+        <div>
+          <span id="accuracyRate">--</span>
+          <small>準確率</small>
+        </div>
+        <div>
+          <span id="streakCount">0</span>
+          <small>連對</small>
+        </div>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <aside class="sidebar">
+        <section class="panel">
+          <div class="panel-title">
+            <span>範疇</span>
+            <button id="resetProgress" class="icon-button" type="button" title="重設進度" aria-label="重設進度">↻</button>
+          </div>
+          <div id="topicList" class="topic-list" role="listbox" aria-label="選擇溫習範疇"></div>
+        </section>
+
+        <section class="panel compact">
+          <div class="panel-title">模式</div>
+          <div class="segmented" role="radiogroup" aria-label="練習模式">
+            <button class="segment active" type="button" data-mode="practice">專題</button>
+            <button class="segment" type="button" data-mode="mixed">綜合</button>
+            <button class="segment" type="button" data-mode="wrong">錯題</button>
+          </div>
+        </section>
+
+        <section class="panel compact">
+          <div class="panel-title">本題資料</div>
+          <dl class="meta-list">
+            <div>
+              <dt>單元</dt>
+              <dd id="unitLabel">--</dd>
+            </div>
+            <div>
+              <dt>重點</dt>
+              <dd id="focusLabel">--</dd>
+            </div>
+          </dl>
+        </section>
+      </aside>
+
+      <section class="practice-area">
+        <div class="question-panel">
+          <div class="question-head">
+            <div>
+              <span id="topicPill" class="topic-pill">5N1</span>
+              <h2 id="questionTitle">準備題目中</h2>
+            </div>
+            <button id="newQuestion" class="secondary-button" type="button">下一題</button>
+          </div>
+
+          <div id="diagramArea" class="diagram-area" aria-live="polite"></div>
+          <p id="questionText" class="question-text"></p>
+
+          <div id="answerArea" class="answer-area"></div>
+
+          <div class="action-row">
+            <button id="checkAnswer" class="primary-button" type="button">批改</button>
+            <button id="showHint" class="ghost-button" type="button">提示</button>
+            <button id="skipQuestion" class="ghost-button" type="button">跳過</button>
+          </div>
+
+          <div id="feedbackBox" class="feedback" aria-live="polite"></div>
+        </div>
+
+        <div class="lower-grid">
+          <section class="panel">
+            <div class="panel-title">小五單元</div>
+            <div id="curriculumGrid" class="curriculum-grid"></div>
+          </section>
+          <section class="panel">
+            <div class="panel-title">今日弱項</div>
+            <div id="weakList" class="weak-list"></div>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <footer class="source-note">
+      範圍按教育局《<a href="https://www.edb.gov.hk/attachment/tc/curriculum-development/kla/ma/curr/pmc2017_tc.pdf" target="_blank" rel="noopener">數學教育學習領域課程指引補充文件：小學數學科學習內容</a>》（2017）小五單元整理。
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
