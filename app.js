@@ -1107,7 +1107,18 @@
   }
 
   function makeChoices(correctLabel, distractors) {
-    const unique = [correctLabel, ...distractors].filter((item, index, list) => list.indexOf(item) === index);
+    const unique = [];
+    [correctLabel, ...distractors].forEach((item) => {
+      const label = String(item);
+      if (!unique.includes(label)) unique.push(label);
+    });
+    const numericAnswer = Number(String(correctLabel).replace(/,/g, ""));
+    if (Number.isFinite(numericAnswer)) {
+      [1, -1, 2, -2, 5, -5, 10, -10].forEach((offset) => {
+        const candidate = String(cleanDecimal(numericAnswer + offset));
+        if (unique.length < 4 && !unique.includes(candidate)) unique.push(candidate);
+      });
+    }
     return shuffle(unique.slice(0, 4)).map((label) => ({ label, value: label }));
   }
 
