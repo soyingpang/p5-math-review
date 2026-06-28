@@ -1137,69 +1137,241 @@
     return mathQuestion(topic);
   }
 
-  function chineseQuestion(topic) {
-    const level = gradeLevel(topic.gradeId);
-    const readingItems = level <= 3
-      ? [
-          ["「小狗在門口搖尾巴。」這句主要寫甚麼？", "小狗的動作", ["天氣", "時間", "地點"], "題目中的重點是「小狗」和「搖尾巴」，所以主要寫小狗的動作。"],
-          ["「妹妹把書包放在椅子上。」誰把書包放好？", "妹妹", ["哥哥", "老師", "媽媽"], "句子的主語是妹妹。"]
-        ]
-      : [
-          ["文章標題若是《一次難忘的比賽》，最可能屬於哪一類文章？", "記敘文", ["說明文", "議論文", "書信"], "題目含有事件和經歷，通常以記敘為主。"],
-          ["閱讀時要概括段意，最重要先找甚麼？", "中心句或重點事件", ["生字筆畫", "標點數量", "作者姓名"], "段意要抓住該段最核心的意思。"]
-        ];
-    const writingItems = [
-      ["「因為下雨，____ 我帶了雨傘。」橫線應填入甚麼？", "所以", ["但是", "如果", "雖然"], "「因為……所以……」表示因果關係。"],
-      ["寫作開首最需要做到甚麼？", "交代人物、時間、地點或事情", ["只寫結尾", "重複題目十次", "完全不用標點"], "清楚交代背景，讀者才容易明白。"]
-    ];
-    const wordItems = [
-      ["「安靜」的相反詞較接近哪一個？", "吵鬧", ["整齊", "明亮", "寒冷"], "安靜與吵鬧意思相反。"],
-      ["「專心」較適合形容哪一種情況？", "認真做功課", ["四處奔跑", "胡亂塗寫", "大聲爭吵"], "專心表示集中精神。"]
-    ];
-    const seniorItems = [
-      ["議論文的論點應該怎樣？", "清楚表明立場", ["只列出故事人物", "避免任何例子", "只寫景物"], "論點是議論文的核心，需要清楚可辯。"],
-      ["文言文翻譯時，最應先掌握甚麼？", "關鍵字詞和句子關係", ["字體顏色", "篇幅長短", "標題裝飾"], "理解關鍵詞和句式，才能準確翻譯。"]
-    ];
-    const pool = level >= 10 ? seniorItems : topic.name.includes("寫") ? writingItems : topic.name.includes("字") || topic.name.includes("語文") ? wordItems : readingItems;
-    const item = sample(pool);
+  function bankQuestion(topic, entries, hint) {
+    const item = sample(entries);
     return makeChoiceQuestion({
       topicId: topic.id,
       title: topic.name,
       prompt: item[0],
-      hint: "先找題目關鍵詞，再判斷它問的是內容、語文知識還是表達方法。",
+      hint: item[4] || hint,
       work: item[3]
     }, item[1], item[2]);
   }
 
+  function chineseQuestion(topic) {
+    const bank = {
+      primary: {
+        "字詞認讀": [
+          ["「安靜」的相反詞較接近哪一個？", "吵鬧", ["整齊", "明亮", "寒冷"], "安靜與吵鬧意思相反。"],
+          ["「專心」較適合形容哪一種情況？", "認真做功課", ["四處奔跑", "胡亂塗寫", "大聲爭吵"], "專心表示集中精神做一件事。"],
+          ["下列哪個詞語可形容天氣很好？", "晴朗", ["飢餓", "破舊", "害羞"], "晴朗通常用來形容天氣清明。"],
+          ["「書包」屬於哪一類詞語？", "物件", ["動作", "顏色", "聲音"], "書包是一件可以看見和使用的物件。"]
+        ],
+        "閱讀理解": [
+          ["「小狗在門口搖尾巴。」這句主要寫甚麼？", "小狗的動作", ["天氣", "時間", "作者心情"], "句子重點是小狗正在搖尾巴。"],
+          ["「妹妹把書包放在椅子上。」誰把書包放好？", "妹妹", ["哥哥", "老師", "媽媽"], "句子的主語是妹妹。"],
+          ["閱讀故事時，要知道主角遇到甚麼，應先找甚麼？", "事情經過", ["字體大小", "頁碼", "標點數量"], "故事理解要掌握人物和事情經過。"],
+          ["題目問「為甚麼」，答案通常要找甚麼？", "原因", ["顏色", "數量", "稱呼"], "為甚麼是在問原因。"]
+        ],
+        "句子運用": [
+          ["「因為下雨，____ 我帶了雨傘。」橫線應填入甚麼？", "所以", ["但是", "如果", "雖然"], "「因為……所以……」表示因果關係。"],
+          ["哪一句標點較合適？", "你今天開心嗎？", ["你今天開心嗎。", "你今天開心嗎，", "你今天開心嗎、"], "問句結尾應用問號。"],
+          ["「我喜歡閱讀，也喜歡畫畫。」句中的「也」表示甚麼？", "加上另一件相同方向的事", ["轉折", "原因", "比較"], "「也」表示再加一項相近內容。"],
+          ["把「太陽出來了。花兒開了。」合併，哪一句較通順？", "太陽出來了，花兒也開了。", ["太陽但是花兒開了。", "花兒因為太陽嗎。", "出來了花兒太陽。"], "合併句子要保留意思並保持語序通順。"]
+        ],
+        "寫作表達": [
+          ["寫看圖作文時，第一步最應該做甚麼？", "看清圖中人物和事情", ["先寫結尾", "只數標點", "抄題目十次"], "先觀察圖意，才知道要寫甚麼。"],
+          ["寫日記時，下列哪項最常見？", "日期和當日經歷", ["收件人地址", "商品價錢", "菜單"], "日記通常記錄日期、事情和感受。"],
+          ["哪一句較適合描寫心情？", "我高興得跳了起來。", ["桌子有四隻腳。", "今天是星期三。", "書包在椅子旁。"], "這句直接寫出高興的反應。"],
+          ["一段短文結尾最好做到甚麼？", "收束事情或寫出感受", ["突然換成無關人物", "只寫一串數字", "完全沒有標點"], "結尾要令內容完整。"]
+        ],
+        "聆聽說話": [
+          ["聆聽指示時，最重要先記住甚麼？", "要做的步驟", ["說話人的衣服顏色", "課室牆壁顏色", "椅子數目"], "指示的重點是行動步驟。"],
+          ["同學分享時，合適的做法是甚麼？", "望著對方並安靜聆聽", ["不停插嘴", "背向對方", "大聲唱歌"], "良好聆聽要專注和尊重。"],
+          ["說話匯報時，聲音應該怎樣？", "清楚而適中", ["越細越好", "含糊不清", "完全不看聽眾"], "清楚表達才容易讓人聽明白。"],
+          ["想補充別人的意見，可先說甚麼？", "我想補充一點", ["你一定錯了", "我不聽", "不要再說"], "補充時應保持禮貌。"]
+        ]
+      },
+      junior: {
+        "閱讀策略": [
+          ["概括一段文字時，最重要保留甚麼？", "中心意思", ["所有例子原句", "字體大小", "標點數量"], "概括要刪去枝節，保留中心。"],
+          ["分析人物性格，最可靠的根據是甚麼？", "人物言行和事件", ["文章長短", "插圖顏色", "作者姓名筆畫"], "言行和事件能反映人物性格。"],
+          ["閱讀議論文字時，應先找甚麼？", "論點", ["押韻字", "天氣描寫", "對話符號"], "論點是議論的核心立場。"],
+          ["若題目問「作者態度」，應留意甚麼？", "用詞和評價語氣", ["頁碼", "段落數目", "字體"], "態度常由褒貶用詞和語氣反映。"]
+        ],
+        "文言基礎": [
+          ["文言文中「曰」通常解作甚麼？", "說", ["走", "看", "吃"], "「曰」是常見文言動詞，意思是說。"],
+          ["翻譯文言句子時，第一步宜怎樣？", "找出關鍵字詞", ["先改標題顏色", "只數字數", "略過主語"], "理解關鍵詞是翻譯基礎。"],
+          ["「之」在文言文中可能有多種意思，判斷時要看甚麼？", "上下文", ["字體", "行距", "頁邊"], "虛詞意思要按語境判斷。"],
+          ["閱讀文言故事，理解人物行動後應再想甚麼？", "行動反映的品格或道理", ["印刷紙質", "標點數目", "段落縮排"], "文言故事常借事件帶出道理。"]
+        ],
+        "寫作訓練": [
+          ["記敘文六要素不包括哪一項？", "售價", ["人物", "時間", "地點"], "記敘文重視人物、時間、地點、起因、經過、結果。"],
+          ["議論文提出例子，主要作用是甚麼？", "支持論點", ["代替標題", "增加頁數", "避開立場"], "例子要服務論點。"],
+          ["描寫環境時，加入感官細節有甚麼好處？", "令畫面更具體", ["令主旨消失", "避免讀者理解", "一定減少字數"], "感官描寫能增加具體感。"],
+          ["寫說明文時，語氣通常應怎樣？", "清楚客觀", ["故意含糊", "只靠誇張", "完全不用次序"], "說明文重視準確和條理。"]
+        ],
+        "語文知識": [
+          ["「雖然……但是……」表示甚麼關係？", "轉折", ["因果", "並列", "遞進"], "雖然和但是表示前後意思有轉折。"],
+          ["「他跑得像風一樣快」用了哪種修辭？", "比喻", ["排比", "設問", "反問"], "把速度比作風，是比喻。"],
+          ["修改病句時，應先檢查甚麼？", "句子意思是否通順", ["字體是否漂亮", "紙張是否夠厚", "段落是否必定很長"], "病句重點是語意和語法。"],
+          ["「不但……而且……」表示甚麼？", "遞進", ["選擇", "時間", "否定全部"], "後句意思通常比前句再進一步。"]
+        ],
+        "說話能力": [
+          ["小組討論時，回應同學前應先做甚麼？", "聽清楚對方觀點", ["立即否定", "轉身離開", "只看手機"], "回應要建基於理解。"],
+          ["演講開首最需要做到甚麼？", "清楚帶出主題", ["只說多謝", "沉默很久", "背向聽眾"], "開首要讓聽眾知道主題。"],
+          ["匯報資料時，怎樣安排較清楚？", "先總述再分點", ["隨意跳來跳去", "只讀最後一句", "把例子全部刪去"], "有層次的安排較易理解。"],
+          ["回答追問時，若需要時間思考，可以怎樣？", "先簡短確認問題", ["裝作沒聽見", "改談無關內容", "立刻離場"], "確認問題能爭取思考並保持禮貌。"]
+        ]
+      },
+      senior: {
+        "閱讀卷訓練": [
+          ["比較兩篇文章觀點時，最重要先找甚麼？", "兩者的共同點和差異", ["字數是否相同", "標題顏色", "頁碼"], "比較題要同時處理相同和不同之處。"],
+          ["答閱讀理解長題時，最佳做法是甚麼？", "引用文本重點再解釋", ["只寫個人喜好", "只抄題目", "完全不分段"], "高階答案要有文本根據和分析。"],
+          ["分析寫作手法，答案應包含甚麼？", "手法、例子和效果", ["作者年齡", "紙張大小", "字體"], "手法題要說明效果。"],
+          ["若文章語氣由輕鬆轉為沉重，反映甚麼？", "情感或主題有變化", ["必定轉換作者", "文章無主旨", "不需要理解"], "語氣變化常配合內容推進。"]
+        ],
+        "寫作卷訓練": [
+          ["審題時，最先要確定甚麼？", "文體和題目要求", ["字體大小", "頁邊距", "墨水顏色"], "文體和要求決定內容方向。"],
+          ["議論文的分論點應該怎樣？", "能支持中心論點", ["互相矛盾", "完全離題", "只重複題目"], "分論點要共同支撐中心立場。"],
+          ["記敘文要寫得有層次，可重點處理甚麼？", "情節推進和人物轉變", ["只堆砌形容詞", "不交代事件", "只寫天氣"], "情節和人物變化能增加深度。"],
+          ["寫作結尾最忌甚麼？", "突然加入無關新主題", ["回扣主旨", "總結感受", "呼應開首"], "結尾應收束而非另開新題。"]
+        ],
+        "文言閱讀": [
+          ["文言文翻譯「信」時，不能只固定解作一個意思，原因是甚麼？", "一詞多義，要看語境", ["字太短", "一定是人名", "沒有句子作用"], "文言實詞常有多個義項。"],
+          ["判斷文言人物形象，應結合甚麼？", "言行、處境和結果", ["印刷格式", "標題長短", "標點多少"], "人物形象要由事件證明。"],
+          ["翻譯倒裝句時，應先做甚麼？", "理順現代漢語語序", ["刪去主語", "保留所有倒裝不理", "只看最後一字"], "倒裝句要按現代語序理解。"],
+          ["文言虛詞題最需要留意甚麼？", "句中位置和前後關係", ["字體顏色", "行距", "頁碼"], "虛詞功能由語法位置和語境決定。"]
+        ],
+        "綜合能力": [
+          ["整合多段材料時，最重要避免甚麼？", "逐句抄錄而不歸納", ["分點作答", "引用關鍵資料", "按任務寫作"], "綜合能力重視篩選和歸納。"],
+          ["實用文寫作先要確認甚麼？", "身份、對象和目的", ["紙張品牌", "字數必定最多", "是否有插圖"], "身份、對象、目的會影響語氣和格式。"],
+          ["轉述資料時，應該怎樣？", "保持原意並用清楚語句重組", ["加入無根據猜測", "故意改變數據", "只抄第一句"], "轉述要準確而有組織。"],
+          ["綜合任務中，標題和小標題的作用是甚麼？", "幫助組織內容", ["取代所有正文", "令內容離題", "只作裝飾"], "標題可提示層次。"]
+        ],
+        "口語溝通": [
+          ["小組討論要有說服力，發言應包括甚麼？", "立場、理由和例子", ["只重複同一句", "完全不回應他人", "只說不知道"], "有理據才有說服力。"],
+          ["回應反方意見時，較成熟的做法是甚麼？", "先承認合理部分再提出補充", ["人身攻擊", "立即大叫", "離開座位"], "理性回應能提升討論質素。"],
+          ["個人短講結尾應怎樣？", "總結重點並扣回主題", ["突然停止", "加入無關故事", "只說再見"], "結尾要令內容完整。"],
+          ["討論時若資料不足，應怎樣表達？", "說明限制並提出可行推論", ["假裝肯定", "完全沉默", "改談娛樂"], "承認限制比亂猜更可靠。"]
+        ]
+      }
+    };
+    const band = gradeBand(topic.gradeId);
+    const entries = bank[band][topic.name] || Object.values(bank[band])[0];
+    return bankQuestion(topic, entries, "先找題目關鍵詞，再判斷它問的是內容、語文知識還是表達方法。");
+  }
+
   function englishQuestion(topic) {
-    const level = gradeLevel(topic.gradeId);
-    const primary = [
-      ["Choose the correct word: She ____ to school every day.", "goes", ["go", "going", "went"], "For he/she/it in the simple present tense, add -s or -es: she goes."],
-      ["Which word is an adjective?", "happy", ["run", "quickly", "school"], "An adjective describes a noun or a person."],
-      ["Choose the best response: How are you?", "I'm fine, thank you.", ["It is a pencil.", "At seven o'clock.", "In the box."], "The question asks about someone's condition."]
-    ];
-    const junior = [
-      ["Choose the correct tense: I ____ my homework before dinner yesterday.", "finished", ["finish", "finishes", "will finish"], "Yesterday shows the past tense, so use finished."],
-      ["Which connector shows contrast?", "however", ["because", "therefore", "firstly"], "However introduces a contrasting idea."],
-      ["What is the main purpose of a topic sentence?", "To show the main idea of a paragraph", ["To end the whole essay", "To list every example", "To replace punctuation"], "A topic sentence guides the paragraph."]
-    ];
-    const senior = [
-      ["Which phrase is most suitable for a formal argumentative essay?", "It can be argued that", ["You know what", "Loads of people say", "This is super cool"], "Formal writing avoids casual speech and uses precise phrasing."],
-      ["In reading comprehension, evidence-based answers should include what?", "Relevant textual support", ["Only personal feelings", "A copied title only", "Random examples"], "Evidence from the text supports the answer."],
-      ["Choose the more precise verb: The report ____ several causes of the problem.", "identifies", ["does", "gets", "makes"], "Identifies precisely means points out or recognizes."]
-    ];
-    const item = sample(level <= 6 ? primary : level <= 9 ? junior : senior);
-    return makeChoiceQuestion({
-      topicId: topic.id,
-      title: topic.name,
-      prompt: item[0],
-      hint: "Look at the keywords in the sentence and decide the grammar, meaning or text purpose.",
-      work: item[3]
-    }, item[1], item[2]);
+    const bank = {
+      primary: {
+        "Vocabulary": [
+          ["Choose the word that means very small.", "tiny", ["huge", "loud", "late"], "Tiny means very small."],
+          ["Which word is a place?", "library", ["happy", "quickly", "jump"], "A library is a place where people read or borrow books."],
+          ["Choose the opposite of cold.", "hot", ["slow", "short", "quiet"], "Hot is the opposite of cold."],
+          ["Which word names an animal?", "rabbit", ["window", "purple", "write"], "A rabbit is an animal."]
+        ],
+        "Grammar": [
+          ["Choose the correct word: She ____ to school every day.", "goes", ["go", "going", "went"], "For he/she/it in the simple present tense, add -s or -es: she goes."],
+          ["Choose the correct pronoun: Tom is my friend. ____ is kind.", "He", ["She", "It", "They"], "Tom is one boy, so use he."],
+          ["Choose the correct preposition: The cat is ____ the table.", "under", ["happy", "run", "blue"], "Under tells where the cat is."],
+          ["Choose the correct past tense: We ____ football yesterday.", "played", ["play", "plays", "playing"], "Yesterday shows past time, so use played."]
+        ],
+        "Reading": [
+          ["A text says, \"Mia packed an umbrella because dark clouds filled the sky.\" Why did Mia pack an umbrella?", "She thought it might rain.", ["She was hungry.", "She lost her bag.", "She wanted to swim."], "Dark clouds suggest rain."],
+          ["What is the main idea of a paragraph?", "The most important point", ["Only the last word", "A punctuation mark", "The page number"], "The main idea is what the paragraph is mostly about."],
+          ["If a story says Ben smiled and clapped, how does Ben probably feel?", "happy", ["angry", "sleepy", "afraid"], "Smiling and clapping usually show happiness."],
+          ["Which detail answers \"where\"?", "in the playground", ["after lunch", "because it rained", "very slowly"], "Where asks for a place."]
+        ],
+        "Writing": [
+          ["Which sentence has a capital letter and a full stop?", "I like apples.", ["i like apples", "I like apples", "i like apples."], "A sentence starts with a capital letter and ends with punctuation."],
+          ["Which sentence is best for describing a pet?", "My dog has soft brown fur.", ["The bus is late.", "I do homework.", "It is Tuesday."], "The sentence gives details about a dog."],
+          ["What should a short story have?", "A beginning, middle and ending", ["Only a title", "Only one word", "No characters"], "A clear story has a basic sequence."],
+          ["Which word can join two ideas?", "and", ["table", "green", "seven"], "And joins related ideas."]
+        ],
+        "Speaking & Listening": [
+          ["What should you do when listening to instructions?", "Listen for the steps", ["Talk loudly", "Look away", "Ignore keywords"], "Instructions tell you what to do step by step."],
+          ["Choose the best reply: Thank you.", "You're welcome.", ["I am seven.", "It is under the chair.", "Blue."], "You're welcome is a polite reply to thank you."],
+          ["When giving a short presentation, your voice should be ____.", "clear", ["silent", "unclear", "hidden"], "A clear voice helps listeners understand."],
+          ["In a conversation, what should you do before answering?", "Listen to the question", ["Walk away", "Cover your ears", "Change topic immediately"], "Listening helps you answer correctly."]
+        ]
+      },
+      junior: {
+        "Vocabulary": [
+          ["Choose the best word: The instructions were clear and easy to follow.", "clear", ["ancient", "noisy", "round"], "Clear means easy to understand."],
+          ["Which word is closest in meaning to \"rapid\"?", "fast", ["empty", "kind", "weak"], "Rapid means fast."],
+          ["Choose the correct collocation.", "make a decision", ["do a decision", "take a homework", "make a shower"], "We say make a decision."],
+          ["Use context: The room was spotless; there was no dust anywhere. What does spotless mean?", "very clean", ["very dark", "very small", "very noisy"], "No dust anywhere shows the room was very clean."]
+        ],
+        "Grammar": [
+          ["Choose the correct tense: I ____ my homework before dinner yesterday.", "finished", ["finish", "finishes", "will finish"], "Yesterday shows the past tense."],
+          ["Choose the correct modal: Students ____ bring their handbook tomorrow.", "must", ["yesterday", "under", "quickly"], "Must expresses an obligation."],
+          ["Choose the correct reported speech: She said, \"I am tired.\"", "She said that she was tired.", ["She said that I am tired.", "She says tired.", "She said tiredly tomorrow."], "Reported speech usually shifts am to was in past reporting."],
+          ["Choose the correct relative pronoun: This is the book ____ I borrowed.", "that", ["who", "when", "where"], "That can refer to a thing."]
+        ],
+        "Reading Skills": [
+          ["What is skimming mainly used for?", "Getting the general idea quickly", ["Checking every spelling", "Counting commas", "Memorising one sentence"], "Skimming helps you understand the gist."],
+          ["What is scanning mainly used for?", "Finding specific information", ["Reading every word slowly", "Guessing the ending", "Writing a summary"], "Scanning helps locate names, dates or figures."],
+          ["What is the main purpose of a topic sentence?", "To show the main idea of a paragraph", ["To end the whole essay", "To list every example", "To replace punctuation"], "A topic sentence guides the paragraph."],
+          ["If a writer uses words like \"unfortunately\" and \"worrying\", what can they show?", "A negative attitude", ["A recipe", "A timetable", "A direct quote only"], "These words signal concern or negativity."]
+        ],
+        "Writing Skills": [
+          ["Which connector shows contrast?", "however", ["because", "therefore", "firstly"], "However introduces a contrasting idea."],
+          ["Which sentence is most suitable for a formal email opening?", "I am writing to enquire about the course.", ["Hey, what's up?", "Yo, tell me now.", "This thing is cool."], "Formal emails use polite and precise language."],
+          ["What makes a paragraph cohesive?", "Ideas are linked clearly", ["Every sentence changes topic", "No pronouns are used ever", "All examples are removed"], "Cohesion means ideas connect smoothly."],
+          ["Which is the best concluding sentence?", "Therefore, regular reading can improve vocabulary.", ["And then blue.", "My first point is next.", "Because of table."], "A conclusion should sum up the idea."]
+        ],
+        "Oral Communication": [
+          ["In a group discussion, what should you do after giving an opinion?", "Support it with a reason", ["Stop others from speaking", "Repeat one word", "Leave the group"], "Reasons make opinions stronger."],
+          ["Which phrase politely disagrees?", "I see your point, but I think...", ["You are silly.", "Stop talking.", "No one cares."], "Polite disagreement respects others."],
+          ["What helps a presentation sound organized?", "Signposting words such as first and finally", ["Speaking with no order", "Avoiding all examples", "Reading only the title"], "Signposting guides listeners."],
+          ["When you do not understand a question, what can you say?", "Could you repeat the question, please?", ["I will ignore you.", "That is your problem.", "Never mind forever."], "Asking for repetition is appropriate."]
+        ]
+      },
+      senior: {
+        "Reading Paper": [
+          ["In reading comprehension, evidence-based answers should include what?", "Relevant textual support", ["Only personal feelings", "A copied title only", "Random examples"], "Evidence from the text supports the answer."],
+          ["What does \"tone\" refer to in a passage?", "The writer's attitude or feeling", ["The number of lines", "The font size", "The paper colour"], "Tone is shown through word choice and style."],
+          ["When comparing two views, what should an answer identify?", "Similarities and differences", ["Only the shorter text", "Only punctuation", "The writer's birthday"], "Comparison requires both sides."],
+          ["If a question asks for purpose, what should you explain?", "Why the writer includes that detail", ["How many letters it has", "Whether it is printed in bold", "The page margin"], "Purpose concerns the function of the detail."]
+        ],
+        "Writing Paper": [
+          ["Which phrase is most suitable for a formal argumentative essay?", "It can be argued that", ["You know what", "Loads of people say", "This is super cool"], "Formal writing avoids casual speech."],
+          ["What should a thesis statement do?", "State the main argument clearly", ["List random words", "Avoid any position", "Replace all examples"], "A thesis sets the direction of an essay."],
+          ["Which feature is important in a proposal?", "Practical recommendations", ["Only jokes", "No headings ever", "Unrelated stories"], "A proposal should suggest workable actions."],
+          ["What does register mean in writing?", "The level of formality and language choice", ["The number of pages", "The ink colour", "The paragraph width"], "Register must match audience and purpose."]
+        ],
+        "Vocabulary & Usage": [
+          ["Choose the more precise verb: The report ____ several causes of the problem.", "identifies", ["does", "gets", "makes"], "Identifies precisely means points out or recognizes."],
+          ["Which phrase is most academic?", "a significant increase", ["a big big rise", "loads more", "super much"], "Academic writing uses precise wording."],
+          ["Choose the correct collocation.", "pose a challenge", ["make a challenge to the floor", "do a challenge strongly", "give a challenge of rain"], "Pose a challenge is a standard collocation."],
+          ["Which word best replaces \"bad\" in \"a bad effect\"?", "harmful", ["round", "sleepy", "wooden"], "Harmful is more precise than bad."]
+        ],
+        "Listening & Integrated Skills": [
+          ["In an integrated task, notes should mainly capture what?", "Key points and task requirements", ["Every filler word", "Speaker's hairstyle", "Background colour"], "Good notes focus on usable information."],
+          ["When transferring data from a chart, what is most important?", "Accuracy", ["Changing the numbers", "Adding guesses", "Ignoring labels"], "Data transfer must preserve correct information."],
+          ["What should a synthesis do?", "Combine relevant information from sources", ["Copy one source only", "Avoid the task", "Invent statistics"], "Synthesis brings together relevant points."],
+          ["If two sources disagree, what should you do?", "Show the contrast clearly", ["Pretend they are identical", "Delete both sources", "Use neither forever"], "Integrated answers should handle conflicting information."]
+        ],
+        "Speaking": [
+          ["In a speaking exam, an extended answer should include what?", "Point, reason and example", ["One word only", "No explanation", "A private joke"], "A developed answer needs support."],
+          ["How can you build on another speaker's point?", "Add a related reason or example", ["Ignore it completely", "Repeat it word for word only", "Change to an unrelated topic"], "Building on ideas improves interaction."],
+          ["Which phrase helps you invite another view?", "What do you think about this?", ["Stop speaking.", "I refuse to listen.", "Only I can answer."], "Inviting views supports group interaction."],
+          ["If challenged, what is a strong response?", "Clarify your point with evidence", ["Get angry", "Say nothing ever", "Attack the person"], "Evidence-based clarification is persuasive."]
+        ]
+      }
+    };
+    const band = gradeBand(topic.gradeId);
+    const entries = bank[band][topic.name] || Object.values(bank[band])[0];
+    return bankQuestion(topic, entries, "Look at the keywords and decide the grammar, meaning or text purpose.");
   }
 
   function mathQuestion(topic) {
     const level = gradeLevel(topic.gradeId);
+    if (topic.name.includes("數與運算")) return mathNumberQuestion(topic, level);
+    if (topic.name.includes("分數") || topic.name.includes("小數")) return mathFractionDecimalQuestion(topic, level);
+    if (topic.name === "度量" || topic.name.includes("度量與幾何")) return mathMeasurementQuestion(topic, level);
+    if (topic.name.includes("圖形")) return mathShapeQuestion(topic, level);
+    if (topic.name.includes("數據")) return mathDataQuestion(topic, level);
+    if (topic.name.includes("數與代數")) return mathAlgebraQuestion(topic, level);
+    if (topic.name.includes("函數")) return mathFunctionQuestion(topic, level);
+    if (topic.name.includes("坐標")) return mathCoordinateQuestion(topic, level);
+    if (topic.name.includes("微積分")) return mathCalculusQuestion(topic);
+    if (topic.name.includes("統計")) return mathSeniorStatsQuestion(topic);
+    return mathNumberQuestion(topic, level);
+  }
+
+  function mathNumberQuestion(topic, level) {
     if (level <= 3) {
       const a = randInt(8, 80);
       const b = randInt(3, 40);
@@ -1210,33 +1382,119 @@
         prompt: `${a} + ${b} = ?`,
         hint: "先加個位，再加十位。",
         work: `${a} + ${b} = ${result}。`
-      }, String(result), [String(result + 1), String(Math.max(1, result - 1)), String(a - b)]);
+      }, String(result), [String(result + 1), String(Math.max(1, result - 1)), String(Math.abs(a - b))]);
     }
+    const a = randInt(12, 99);
+    const b = randInt(3, 12);
+    const result = a * b;
+    return makeChoiceQuestion({
+      topicId: topic.id,
+      title: topic.name,
+      prompt: `${a} × ${b} = ?`,
+      hint: "可把較大的數拆開，例如十位和個位分開乘。",
+      work: `${a} × ${b} = ${result}。`
+    }, String(result), [String(result + b), String(Math.max(1, result - b)), String(a + b)]);
+  }
+
+  function mathFractionDecimalQuestion(topic, level) {
+    const d = sample([4, 5, 8, 10]);
+    const n = randInt(1, d - 1);
+    if (level <= 3) {
+      return makeChoiceQuestion({
+        topicId: topic.id,
+        title: topic.name,
+        prompt: `一個薄餅平均分成 ${d} 份，吃了 ${n} 份，即是全個的幾分之幾？`,
+        hint: "分母是平均分成的份數，分子是取了的份數。",
+        work: `平均分成 ${d} 份，取 ${n} 份，所以是 ${n}/${d}。`
+      }, `${n}/${d}`, [`${d}/${n}`, `${n}/${d + 1}`, `${Math.max(1, n - 1)}/${d}`]);
+    }
+    const decimal = n / d;
+    return makeChoiceQuestion({
+      topicId: topic.id,
+      title: topic.name,
+      prompt: `${n}/${d} 化成小數是多少？`,
+      hint: "用分子除以分母。",
+      work: `${n} ÷ ${d} = ${cleanDecimal(decimal)}。`
+    }, String(cleanDecimal(decimal)), [String(cleanDecimal(decimal + 0.1)), String(cleanDecimal(decimal * 10)), `${n}.${d}`]);
+  }
+
+  function mathMeasurementQuestion(topic, level) {
     if (level <= 6) {
-      const a = randInt(12, 99);
-      const b = randInt(3, 12);
-      const result = a * b;
+      const length = randInt(6, 18);
+      const width = randInt(3, 12);
+      const perimeter = 2 * (length + width);
       return makeChoiceQuestion({
         topicId: topic.id,
         title: topic.name,
-        prompt: `${a} × ${b} = ?`,
-        hint: "可把較大的數拆開，例如十位和個位分開乘。",
-        work: `${a} × ${b} = ${result}。`
-      }, String(result), [String(result + b), String(Math.max(1, result - b)), String(a + b)]);
+        prompt: `一個長方形長 ${length} cm，闊 ${width} cm，周界是多少？`,
+        hint: "長方形周界 = (長 + 闊) × 2。",
+        work: `(${length} + ${width}) × 2 = ${perimeter} cm。`
+      }, String(perimeter), [String(length * width), String(length + width), String(perimeter + 2)]);
     }
-    if (level <= 9) {
-      const x = randInt(2, 12);
-      const a = randInt(2, 8);
-      const b = randInt(3, 20);
-      const total = a * x + b;
+    const a = randInt(5, 13);
+    const b = randInt(4, 12);
+    const c2 = a * a + b * b;
+    return makeChoiceQuestion({
+      topicId: topic.id,
+      title: topic.name,
+      prompt: `一直角三角形兩條直角邊長 ${a} cm 和 ${b} cm，斜邊長的平方是多少？`,
+      hint: "畢氏定理：斜邊平方 = 兩直角邊平方和。",
+      work: `${a}² + ${b}² = ${a * a} + ${b * b} = ${c2}。`
+    }, String(c2), [String(a + b), String(a * b), String(c2 - a)]);
+  }
+
+  function mathShapeQuestion(topic, level) {
+    if (level <= 6) {
+      const sides = sample([3, 4, 5, 6, 8]);
       return makeChoiceQuestion({
         topicId: topic.id,
         title: topic.name,
-        prompt: `解方程：${a}x + ${b} = ${total}`,
-        hint: "先減常數項，再除以 x 的係數。",
-        work: `${a}x = ${total - b}，x = ${x}。`
-      }, String(x), [String(x + 1), String(Math.max(1, x - 1)), String(total)]);
+        prompt: `一個 ${sides} 邊形有多少條邊？`,
+        hint: "幾邊形就有幾條邊。",
+        work: `${sides} 邊形有 ${sides} 條邊。`
+      }, String(sides), [String(sides + 1), String(Math.max(1, sides - 1)), String(sides * 2)]);
     }
+    const angle = randInt(35, 75);
+    const other = 90 - angle;
+    return makeChoiceQuestion({
+      topicId: topic.id,
+      title: topic.name,
+      prompt: `一直角三角形其中一個銳角是 ${angle}°，另一個銳角是多少？`,
+      hint: "直角三角形兩個銳角相加是 90°。",
+      work: `90° - ${angle}° = ${other}°。`
+    }, `${other}°`, [`${angle}°`, `${180 - angle}°`, `${other + 10}°`]);
+  }
+
+  function mathDataQuestion(topic, level) {
+    const values = level <= 6
+      ? [randInt(4, 12), randInt(4, 12), randInt(4, 12)]
+      : [randInt(12, 30), randInt(12, 30), randInt(12, 30), randInt(12, 30)];
+    const total = values.reduce((sum, item) => sum + item, 0);
+    const average = cleanDecimal(total / values.length);
+    return makeChoiceQuestion({
+      topicId: topic.id,
+      title: topic.name,
+      prompt: `數據為 ${values.join("、")}，平均數是多少？`,
+      hint: "平均數 = 總和 ÷ 數據個數。",
+      work: `(${values.join(" + ")}) ÷ ${values.length} = ${average}。`
+    }, String(average), [String(total), String(cleanDecimal(average + 1)), String(values.length)]);
+  }
+
+  function mathAlgebraQuestion(topic, level) {
+    const x = randInt(2, 12);
+    const a = randInt(2, 8);
+    const b = randInt(3, 20);
+    const total = a * x + b;
+    return makeChoiceQuestion({
+      topicId: topic.id,
+      title: topic.name,
+      prompt: `解方程：${a}x + ${b} = ${total}`,
+      hint: "先減常數項，再除以 x 的係數。",
+      work: `${a}x = ${total - b}，x = ${x}。`
+    }, String(x), [String(x + 1), String(Math.max(1, x - 1)), String(total)]);
+  }
+
+  function mathFunctionQuestion(topic, level) {
     const m = randInt(2, 8);
     const c = randInt(-6, 8);
     const x = randInt(1, 8);
@@ -1248,6 +1506,45 @@
       hint: `把 x 換成 ${x}，再按次序計算。`,
       work: `f(${x}) = ${m} × ${x} ${c >= 0 ? "+" : "-"} ${Math.abs(c)} = ${y}。`
     }, String(y), [String(y + m), String(y - m), String(m + x + c)]);
+  }
+
+  function mathCoordinateQuestion(topic) {
+    const x1 = randInt(-5, 5);
+    const y1 = randInt(-5, 5);
+    const dx = randInt(2, 8);
+    const x2 = x1 + dx;
+    return makeChoiceQuestion({
+      topicId: topic.id,
+      title: topic.name,
+      prompt: `點 A(${x1}, ${y1}) 和 B(${x2}, ${y1}) 的距離是多少？`,
+      hint: "兩點 y 坐標相同，距離是 x 坐標相差的絕對值。",
+      work: `|${x2} - (${x1})| = ${dx}。`
+    }, String(dx), [String(Math.abs(x1 + x2)), String(dx + 1), String(Math.abs(y1))]);
+  }
+
+  function mathCalculusQuestion(topic) {
+    const a = randInt(2, 7);
+    const b = randInt(1, 9);
+    return makeChoiceQuestion({
+      topicId: topic.id,
+      title: topic.name,
+      prompt: `若 f(x) = ${a}x² + ${b}x，f'(x) 是甚麼？`,
+      hint: "x² 的導數是 2x，x 的導數是 1。",
+      work: `f'(x) = ${2 * a}x + ${b}。`
+    }, `${2 * a}x + ${b}`, [`${a}x + ${b}`, `${2 * a}x² + ${b}`, `${a}x² + ${b}`]);
+  }
+
+  function mathSeniorStatsQuestion(topic) {
+    const red = randInt(2, 6);
+    const blue = randInt(3, 8);
+    const total = red + blue;
+    return makeChoiceQuestion({
+      topicId: topic.id,
+      title: topic.name,
+      prompt: `袋中有 ${red} 個紅球和 ${blue} 個藍球，隨機抽一球，抽到紅球的概率是多少？`,
+      hint: "概率 = 符合條件的數量 ÷ 總數量。",
+      work: `紅球 ${red} 個，總數 ${total} 個，所以概率是 ${red}/${total}。`
+    }, `${red}/${total}`, [`${blue}/${total}`, `${red}/${blue}`, `${total}/${red}`]);
   }
 
   function largeNumberCompare(topic) {
